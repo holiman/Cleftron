@@ -37,8 +37,6 @@ function createWindow () {
 
   const iconPath = path.join(__static, 'blu-eth-48x48.png');
 
-  const trayIcon = nativeImage.createFromPath(iconPath);
-  const tray = new Tray(trayIcon);
 
   const menu = Menu.buildFromTemplate([
 
@@ -179,6 +177,8 @@ app.on('ready', function () {
       console.log(e);
     }
   createWindow()
+  const trayIcon = nativeImage.createFromPath(iconPath);
+  tray = new Tray(trayIcon);
 })
 
 app.on('window-all-closed', () => {
