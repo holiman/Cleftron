@@ -1,0 +1,9 @@
+t=2018-05-12T11:23:29+0200 lvl=info msg=Configured api=signer audit log=audit.log
+t=2018-05-12T11:24:47+0200 lvl=info msg=Configured api=signer audit log=audit.log
+t=2018-05-12T11:25:42+0200 lvl=info msg=Configured api=signer audit log=audit.log
+t=2018-05-12T11:26:18+0200 lvl=info msg=Configured api=signer audit log=audit.log
+t=2018-05-12T11:27:00+0200 lvl=info msg=Configured api=signer audit log=audit.log
+t=2018-05-12T11:28:42+0200 lvl=info msg=Sign       api=signer type=request metadata="{\"remote\":\"127.0.0.1:63791\",\"local\":\"localhost:8550\",\"scheme\":\"HTTP/1.1\"}" addr="0xc53f9af2429fa6254398ec28c7fe0597ac38e4c7 [chksum INVALID]" data=01
+t=2018-05-12T11:28:47+0200 lvl=info msg=Sign       api=signer type=response data=7e74dda5e42d71b650fa2825ddb852852dbe497fc3431ed3a65b384f05797ea07d62c60e3e29e922bcddf41db1ce97df529d3d93c5d6fbf9f5cc5e6aaeadc8eb1c error=nil
+t=2018-05-12T11:29:03+0200 lvl=info msg=Sign       api=signer type=request  metadata="{\"remote\":\"127.0.0.1:63793\",\"local\":\"localhost:8550\",\"scheme\":\"HTTP/1.1\"}" addr="0xc53f9af2429fa6254398ec28c7fe0597ac38e4c7 [chksum INVALID]" data=01
+t=2018-05-12T11:29:07+0200 lvl=info msg=Sign       api=signer type=response data=7e74dda5e42d71b650fa2825ddb852852dbe497fc3431ed3a65b384f05797ea07d62c60e3e29e922bcddf41db1ce97df529d3d93c5d6fbf9f5cc5e6aaeadc8eb1c error=nil
