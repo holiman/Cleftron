@@ -173,7 +173,6 @@ function createWindow () {
 
 app.on('ready', function () {
   try{
-    console.log(process.argv)
     if(process.argv[1] === '--clefbin'){
       clefpath = process.argv[2];
     } else {
@@ -190,6 +189,21 @@ app.on('ready', function () {
       console.log(e);
     }
   createWindow()
+
+  let fd = require('fs').createReadStream(clefpath);
+  let hash = require('crypto').createHash('sha256');
+  hash.setEncoding('hex');
+  fd.on('end', function() {
+      hash.end();
+      const notify = new Notification({
+        title: 'Binary Sha256',
+        body: hash.read(),
+        silent: true
+      })
+      notify.show();
+  });
+  fd.pipe(hash);
+
 })
 
 app.on('window-all-closed', () => {
