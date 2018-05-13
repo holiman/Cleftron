@@ -15,6 +15,7 @@ if (process.env.NODE_ENV !== 'development') {
 let mainWindow
 let tray
 let clef
+let clefpath
 
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
@@ -46,7 +47,10 @@ function createWindow () {
         mainWindow.show();
     }},
     {type: "separator"},
-    {role: "quit"},
+    {label: "Exit", click : () => {
+      app.isQuiting = true;
+      app.quit();
+    }},
   ]);
   tray.setContextMenu(menu);
 
@@ -60,8 +64,10 @@ function createWindow () {
   })
 
   mainWindow.on('close', (e) => {
+    if(!app.isQuiting){
     e.preventDefault();
     e.sender.hide();
+    }
   })
 
   ipcMain.on('response', (e, m) => {
@@ -167,13 +173,18 @@ function createWindow () {
 
 app.on('ready', function () {
   try{
-    let clefpath = dialog.showOpenDialog({
-      title : 'Select Clef Binary',
-      filters : [
-        {name: 'Application', extensions: ['exe', 'bin', 'app']},
-        {name: 'All Files', extensions: ['*']}
-      ]
-    })[0]
+    console.log(process.argv)
+    if(process.argv[1] === '--clefbin'){
+      clefpath = process.argv[2];
+    } else {
+      clefpath = dialog.showOpenDialog({
+        title : 'Select Clef Binary',
+        filters : [
+          {name: 'Application', extensions: ['exe', 'bin', 'app']},
+          {name: 'All Files', extensions: ['*']}
+        ]
+      })[0];
+    }
     clef = spawn(clefpath, ['--rpc','--4bytedb' ,path.dirname(clefpath) + '/4byte.json','--ipcdisable','--stdio-ui'])
     } catch (e) {
       console.log(e);
