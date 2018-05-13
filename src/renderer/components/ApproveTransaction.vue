@@ -21,7 +21,7 @@ export default {
       const response = {
         "approved" : true,
         "transaction" : store.state.pending.params[0].transaction,
-        "password" : '',
+        
       }
       ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
       store.dispatch('setUi', '');
@@ -29,8 +29,7 @@ export default {
     reject (evt) {
       const response = {
         "approved" : false,
-        "transaction" : store.state.pending.params[0].transaction,
-        "password" : '',
+        "transaction" : store.state.pending.params[0].transaction
       }
       ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
       store.dispatch('setUi', '');
@@ -40,6 +39,14 @@ export default {
 
   },
   computed: {
+    passphrase: {
+      get () {
+        return store.state.passphrase
+      },
+      set (value) {
+        store.dispatch('addPassphrase', value);
+      }
+    },
     from: {
       get () {
         return store.state.pending.params[0].transaction.from
@@ -192,6 +199,12 @@ export default {
                               :max-rows="6">
                   </b-form-textarea>
               </b-form-group>
+              <b-form-group horizontal
+                              label="Passphrase:"
+                              label-class="text-sm-right"
+                              label-for="pass">
+                  <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
+              </b-form-group>             
             </b-form-group>
             
             <b-container>

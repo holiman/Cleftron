@@ -7,7 +7,9 @@ import Blockie from './Blockie.vue'
 export default {
   data () {
     return {
-      store: store
+      store: store,
+      passphrase : '',
+      newpassphrase : ''
     }
   },
   components: {
@@ -36,6 +38,18 @@ export default {
     <b-form>
         <b-card title="Approve Account Import" bg-variant="light">
             <RequestInfo></RequestInfo>
+              <b-form-group horizontal
+                              label="Old Passphrase:"
+                              label-class="text-sm-right"
+                              label-for="pass">
+                  <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
+              </b-form-group>
+              <b-form-group horizontal
+                              label="New Passphrase:"
+                              label-class="text-sm-right"
+                              label-for="pass">
+                  <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
+              </b-form-group>              
               <b-container>
                 <b-row class="text-center">
                     <b-col class="py-3">

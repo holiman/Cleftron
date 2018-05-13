@@ -7,6 +7,7 @@ import { ipcRenderer } from 'electron'
 Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
+    passphrase: '',
     ui: null,
     logMessages: [],
     pending: {"jsonrpc":"2.0","id":4,"method":"ApproveNewAccount","params":[{"meta":{"remote":"","local":"","scheme":""}}]},
@@ -14,11 +15,13 @@ export default new Vuex.Store({
     pending : {"jsonrpc":"2.0","id":-1,"method":"ApproveExport","params":[{"address":"0x0","meta":{"remote":"signer binary","local":"main","scheme":"in-proc"}}]},
     pending : {"jsonrpc":"2.0","id":-1,"method":"ApproveListing","params":[{"accounts":[{"type":"Account","url":"keystore:///","address":"0x0"},{"type":"Account","url":"keystore:///","address":"0x1"}],"meta":{"remote":"signer binary","local":"main","scheme":"in-proc"}}]},
     pending : {"jsonrpc":"2.0","id":-1,"method":"ApproveSignData","params":[{"address":"0x0","raw_data":"0x0","message":"","hash":"0x0","meta":{"remote":"signer binary","local":"main","scheme":"in-proc"}}]}
-
   },
   mutations: {
       SAVE_DATA(state, data){
         state.pending = data;
+      },
+      SAVE_PASS(state,data){
+          state.passphrase = data;
       },
       LOG_MSG(state,data){
           state.logMessages.push(data)
@@ -33,6 +36,9 @@ actions: {
       },
       addData({commit}, data){
           commit('SAVE_DATA', data)
+      },
+      addPassphrase({commit}, data){
+          commit('SAVE_PASS', data)
       },
       logMsg({commit}, data){
         commit('LOG_MSG', data)

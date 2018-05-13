@@ -14,10 +14,21 @@ export default {
     RequestInfo,
     Blockie
   },
+  computed: {
+    passphrase: {
+      get () {
+        return store.state.passphrase
+      },
+      set (value) {
+        store.dispatch('addPassphrase', value);
+      }
+    }
+  },
   methods: {
     approve (evt) {
       const response = {
-        "approved" : true
+        "approved" : true,
+        "password" : passphrase
       }
       ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
       store.dispatch('setUi', '');
@@ -76,6 +87,12 @@ export default {
                               :rows="4"
                               :max-rows="6">
                   </b-form-textarea>
+              </b-form-group>
+              <b-form-group horizontal
+                              label="Passphrase:"
+                              label-class="text-sm-right"
+                              label-for="pass">
+                  <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
               </b-form-group>
               <b-container>
                 <b-row class="text-center">
