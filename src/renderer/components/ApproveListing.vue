@@ -2,7 +2,7 @@
 import store from '@/store'
 import jsonrpc from 'jsonrpc-lite'
 import { ipcRenderer } from 'electron'
-import RequestInfo from './Requestinfo.vue'
+import RequestInfo from './RequestInfo.vue'
 import Blockie from './Blockie.vue'
 export default {
   data () {
