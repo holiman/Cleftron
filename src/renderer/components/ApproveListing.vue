@@ -24,7 +24,7 @@ export default {
     },
     reject (evt) {
       const response = {
-        "approved" : false
+        "accounts" : [],
       }
       ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
       store.dispatch('setUi', '');

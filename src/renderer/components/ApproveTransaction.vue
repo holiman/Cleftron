@@ -116,12 +116,29 @@ export default {
         data.params[0].transaction.data = value
         store.dispatch('addData', data);
       }
+    },
+    callinfo: {
+      get () {
+        var info = store.state.pending.params[0].call_info
+        if(info){
+          return info.map(function(x){return x.type+ ":"+ x.message}).join("\n");
+        }
+      },    
     }
   }  
 }
 </script>
 
-
+      "call_info": [
+          {
+            "type": "WARNING",
+            "message": "Invalid checksum on to-address"
+          },
+          {
+            "type": "Info",
+            "message": "safeSend(address: 0x0000000000000000000000000000000000000012)"
+          }
+        ],
 <template>
     <b-form>
         <b-card title="Approve Transaction" bg-variant="light">
@@ -193,6 +210,19 @@ export default {
                   <b-form-textarea
                               :disabled="disabled"
                               v-model="txdata" 
+                              id="textarea1"
+                              placeholder="0x0"
+                              :rows="4"
+                              :max-rows="6">
+                  </b-form-textarea>
+              </b-form-group>
+              <b-form-group horizontal
+                              label="Data info:"
+                              label-class="text-sm-right"
+                              label-for="dataInfoInput">
+                  <b-form-textarea
+                              :disabled="disabled"
+                              v-model="callinfo" 
                               id="textarea1"
                               placeholder="0x0"
                               :rows="4"
