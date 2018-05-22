@@ -1,6 +1,8 @@
 # cleftron
 
-> An electron-vue project
+An electron-vue project to serve as a UI for Clef. 
+
+This is PRE-RELEASE software. Use at your own risk, or, preferrably, just don't use this yet. 
 
 #### Build Setup
 
