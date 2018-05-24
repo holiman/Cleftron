@@ -51,6 +51,8 @@ export default {
         store.dispatch('addData', m)
         store.dispatch('setUi', "ApproveNewAccount")
       })       
+      // Let the main process know the page is loaded
+      ipcRenderer.send('channelsConfigured', 'ping')
     }
 }
 </script>

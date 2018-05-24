@@ -65,6 +65,7 @@ function createWindow () {
 	mainWindow.on('hide', () => {})
 	setupTray();
 
+
 	mainWindow.on('close', (e) => {
 		if(!app.isQuiting){
 		e.preventDefault();
@@ -76,16 +77,20 @@ function createWindow () {
 		clef.stdin.write(data);
 		clef.stdin.write("\n");
 	}
-
-
 	ipcMain.on('response', (e, m) => {
 		mainWindow.webContents.send("message", m);
 		send(m);
 	})
+	// From the landing page, we send 'channelsConfigured' when
+	// the receivers are configured, and ready to receive data
+	ipcMain.once('channelsConfigured', () =>{
+		clef.stderr.on('data', (data) => {
+			mainWindow.webContents.send('stderr', data);
+			console.log(String(data));
+		});
+	})
 
-	clef.stderr.on('data', (data) => {
-		mainWindow.webContents.send('message', data);
-	});
+
 	let dispatchers = {
 		ApproveTx : function(payload){
 			mainWindow.webContents.send('addTx', payload);
@@ -141,13 +146,15 @@ function createWindow () {
 			}
 			return
 		}
-		mainWindow.webContents.send('message', data);
+		//mainWindow.webContents.send('message', data);
 	});
 	
 	clef.on('exit', (code) => {
 		throw(code)
 		mainWindow.webContents.send('message', `Child exited with code ${code}`);
 	});
+
+
 }
 
 app.on('ready', function () {

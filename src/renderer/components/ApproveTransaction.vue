@@ -242,7 +242,7 @@ export default {
                       <blockie :address="from"></blockie>
                     </b-input-group-text>
                     <b-form-input v-validate="'required|eth_hex|eth_address|eth_checksum'" name='from' v-model="from" plaintext id="fromInput"></b-form-input>
-                    <span>{{ errors.first('from') }}</span>
+                    <b-alert v-if="errors.first('from')" show variant="danger">{{ errors.first('from') }}</b-alert>
                   </b-input-group>
                   
               </b-form-group>
@@ -255,7 +255,7 @@ export default {
                       <blockie :address="to"></blockie>
                     </b-input-group-text>
                     <b-form-input v-model="to" v-validate="'eth_hex|eth_address|eth_checksum'" plaintext id="toInput" name='to'></b-form-input>
-                    <span>{{ errors.first('to') }}</span>
+                     <b-alert v-if="errors.first('to')" show variant="danger">{{ errors.first('to') }}</b-alert>
                   </b-input-group>
                   
               </b-form-group>
@@ -264,27 +264,28 @@ export default {
                               label-class="text-sm-right"
                               label-for="valueInput">
                   <b-form-input v-model="value" :disabled="disabled" id="valueInput" v-validate="'required|eth_hex'" name='value'></b-form-input>
-                    <span>{{ errors.first('value') }}</span>
+                  <b-alert v-if="errors.first('value')" show variant="danger">{{ errors.first('value') }}</b-alert>
               </b-form-group>
               <b-form-group horizontal
                               label="Gas:"
                               label-class="text-sm-right"
                               label-for="gasInput">
                   <b-form-input v-model="gas" :disabled="disabled" id="gasInput" v-validate="'required|eth_hex'" name='gas'></b-form-input>
-                  <span>{{ errors.first('gas') }}</span>
+                  <b-alert v-if="errors.first('gas')" show variant="danger">{{ errors.first('gas') }}</b-alert>
               </b-form-group>
               <b-form-group horizontal
                               label="Gas price:"
                               label-class="text-sm-right"
                               label-for="gasPriceInput">
                   <b-form-input v-model="gasPrice" :disabled="disabled" id="gasPriceInput" v-validate="'required|eth_hex'" name='gasPrice'></b-form-input>
-                  <span>{{ errors.first('gasPrice') }}</span>
+                  <b-alert v-if="errors.first('gasPrice')" show variant="danger">{{ errors.first('gasPrice') }}</b-alert>
               </b-form-group>
               <b-form-group horizontal
                               label="Nonce:"
                               label-class="text-sm-right"
                               label-for="nonceInput">
                   <b-form-input v-model="nonce" :disabled="disabled" id="nonceInput" v-validate="'required|eth_hex'" name='nonce'></b-form-input>
+                  <b-alert v-if="errors.first('nonce')" show variant="danger">{{ errors.first('nonce') }}</b-alert>
                   <span>{{ errors.first('nonce') }}</span>
               </b-form-group>
               <b-form-group horizontal
@@ -299,7 +300,7 @@ export default {
                               :rows="4"
                               :max-rows="6" v-validate="'eth_hex'" name="data">
                   </b-form-textarea>
-                  <span>{{ errors.first('data') }}</span>
+                  <b-alert v-if="errors.first('data')" show variant="danger">{{ errors.first('data') }}</b-alert>
               </b-form-group>
               <b-form-group horizontal
                               label="Passphrase:"
