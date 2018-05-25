@@ -72,8 +72,8 @@ export default {
   methods: {
 
     checkForm(evt) {
+      // TODO check for errors
       this.errs = [];
-      this.errs.push("Error here!");
       if(!this.errs.length) return true;
       evt.preventDefault();
     },
@@ -82,19 +82,21 @@ export default {
       if (!this.checkForm(evt)){ return; }
       const response = {
         "approved" : true,
-        "transaction" : store.state.pending.params[0].transaction,
+        "transaction" : store.state.selected.obj.params[0].transaction,
+        "password" : store.state.selected.password,
         
       }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
-      store.dispatch('setUi', '');
+      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
+      store.dispatch('taskDone');
     },
     reject (evt) {
       const response = {
         "approved" : false,
-        "transaction" : store.state.pending.params[0].transaction
+        "transaction" : store.state.selected.obj.params[0].transaction
       }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
-      store.dispatch('setUi', '');
+      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
+      store.dispatch('taskDone');
+
     }
   },
   created: function() {
@@ -103,91 +105,93 @@ export default {
   computed: {
     passphrase: {
       get () {
-        return store.state.passphrase
+        return store.state.selected.password
       },
       set (value) {
-        store.dispatch('addPassphrase', value);
+        let data = store.state.selected.obj
+        store.state.selected.password = value
+        store.dispatch('updateObject', data);
       }
     },
     from: {
       get () {
-        return store.state.pending.params[0].transaction.from
+        return store.state.selected.obj.params[0].transaction.from
       },
       set (value) {
-        let data = store.state.pending
+        let data = store.state.selected.obj
         data.params[0].transaction.from = value
-        store.dispatch('addData', data);
+        store.dispatch('updateObject', data);
       }
     },
     to: {
       get () {
-        return store.state.pending.params[0].transaction.to
+        return store.state.selected.obj.params[0].transaction.to
       },
       set (value) {
-        let data = store.state.pending
+        let data = store.state.selected.obj
         data.params[0].transaction.to = value
-        store.dispatch('addData', data);
+        store.dispatch('updateObject', data);
       }
     },
     gas: {
       get () {
-        return store.state.pending.params[0].transaction.gas
+        return store.state.selected.obj.params[0].transaction.gas
       },
       set (value) {
-        let data = store.state.pending
+        let data = store.state.selected.obj
         data.params[0].transaction.gas = value
-        store.dispatch('addData', data);
+        store.dispatch('updateObject', data);
       }
     },
     gasPrice: {
       get () {
-        return store.state.pending.params[0].transaction.gasPrice
+        return store.state.selected.obj.params[0].transaction.gasPrice
       },
       set (value) {
-        let data = store.state.pending
+        let data = store.state.selected.obj
         data.params[0].transaction.gasPrice = value
-        store.dispatch('addData', data);
+        store.dispatch('updateObject', data);
       }
     },
     nonce: {
       get () {
-        return store.state.pending.params[0].transaction.nonce
+        return store.state.selected.obj.params[0].transaction.nonce
       },
       set (value) {
-        let data = store.state.pending
+        let data = store.state.selected.obj
         data.params[0].transaction.nonce = value
-        store.dispatch('addData', data);
+        store.dispatch('updateObject', data);
       }
     },
     value: {
       get () {
-        return store.state.pending.params[0].transaction.value
+        return store.state.selected.obj.params[0].transaction.value
       },
       set (value) {
-        let data = store.state.pending
+        let data = store.state.selected.obj
         data.params[0].transaction.value = value
-        store.dispatch('addData', data);
+        store.dispatch('updateObject', data);
       }
     },
     txdata: {
       get () {
-        return store.state.pending.params[0].transaction.data
+        return store.state.selected.obj.params[0].transaction.data
       },
       set (value) {
-        let data = store.state.pending
+        let data = store.state.selected.obj
         data.params[0].transaction.data = value
-        store.dispatch('addData', data);
+        store.dispatch('updateObject', data);
       }
     },
     info_warnings:{
       get() {
-        var ci = store.state.pending.params[0].call_info
+        var ci = store.state.selected.obj.params[0].call_info
         return ci.filter( x => x.type !="Info");
       }
     },
     info_notes:{
       get() {
-        var ci = store.state.pending.params[0].call_info
+        var ci = store.state.selected.obj.params[0].call_info
         return ci.filter( x => x.type =="Info");
       }
     },
