@@ -1,37 +1,43 @@
 <script>
-import store from '@/store'
-import jsonrpc from 'jsonrpc-lite'
-import { ipcRenderer } from 'electron'
-import RequestInfo from './RequestInfo.vue'
-import Blockie from './Blockie.vue'
+import store from '@/store';
+import jsonrpc from 'jsonrpc-lite';
+import { ipcRenderer } from 'electron';
+import RequestInfo from './RequestInfo.vue';
+import Blockie from './Blockie.vue';
 export default {
-  data () {
+  data() {
     return {
       store: store,
-      passphrase : '',
-      newpassphrase : ''
-    }
+      passphrase: '',
+      newpassphrase: ''
+    };
   },
   components: {
     RequestInfo
   },
   methods: {
-    approve (evt) {
+    approve(evt) {
       const response = {
-        "approved" : true
-      }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
-      store.dispatch('setUi', '');     
+        approved: true
+      };
+      ipcRenderer.send(
+        'response',
+        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+      );
+      store.dispatch('setUi', '');
     },
-    reject (evt) {
+    reject(evt) {
       const response = {
-        "approved" : false
-      }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
+        approved: false
+      };
+      ipcRenderer.send(
+        'response',
+        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+      );
       store.dispatch('setUi', '');
     }
   }
-}
+};
 </script>
 
 <template>
@@ -49,7 +55,7 @@ export default {
                               label-class="text-sm-right"
                               label-for="pass">
                   <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
-              </b-form-group>              
+              </b-form-group>
               <b-container>
                 <b-row class="text-center">
                     <b-col class="py-3">
@@ -63,4 +69,3 @@ export default {
         </b-card>
     </b-form>
 </template>
-           

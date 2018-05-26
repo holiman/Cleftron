@@ -1,16 +1,15 @@
 <script>
-  import { ipcRenderer } from 'electron'
-  import store from '@/store'
-  export default {
-    name: 'Cleftron',
-    data () {
-      return {
-        store: store
-      }
-    },
-    created: function() {
-    }
-  }
+import { ipcRenderer } from 'electron';
+import store from '@/store';
+export default {
+  name: 'Cleftron',
+  data() {
+    return {
+      store: store
+    };
+  },
+  created: function() {}
+};
 </script>
 
 <template>

@@ -1,41 +1,44 @@
 <script>
-import store from '@/store'
-import jsonrpc from 'jsonrpc-lite'
-import { ipcRenderer } from 'electron'
-import RequestInfo from './RequestInfo.vue'
-import Blockie from './Blockie.vue'
+import store from '@/store';
+import jsonrpc from 'jsonrpc-lite';
+import { ipcRenderer } from 'electron';
+import RequestInfo from './RequestInfo.vue';
+import Blockie from './Blockie.vue';
 export default {
-  data () {
+  data() {
     return {
       state: store.state
-    }
+    };
   },
   components: {
     RequestInfo,
     Blockie
   },
   methods: {
-    approve (evt) {
+    approve(evt) {
       const response = {
-        "accounts" : store.state.selected.obj.params[0].accounts
-      }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
+        accounts: store.state.selected.obj.params[0].accounts
+      };
+      ipcRenderer.send(
+        'response',
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
+      );
       store.dispatch('taskDone');
     },
-    reject (evt) {
+    reject(evt) {
       const response = {
-        "accounts" : [],
-      }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
+        accounts: []
+      };
+      ipcRenderer.send(
+        'response',
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
+      );
       store.dispatch('taskDone');
     }
   },
-  created: function() {
-
-  },
-  computed: {
-  }  
-}
+  created: function() {},
+  computed: {}
+};
 </script>
 
 

@@ -1,34 +1,34 @@
 <script>
-import { ipcRenderer } from 'electron'
-import store from '@/store'
-import jsonrpc from 'jsonrpc-lite'
-import StringDecoder from 'string_decoder'
-import ansicolor from 'ansicolor'
+import { ipcRenderer } from 'electron';
+import store from '@/store';
+import jsonrpc from 'jsonrpc-lite';
+import StringDecoder from 'string_decoder';
+import ansicolor from 'ansicolor';
 //const decoder = new StringDecoder.StringDecoder('utf8');
 
 export default {
-	data () {
-		return {
-			store: store
-	 }
-	},
-	created: function() {
-			ipcRenderer.on('message', (e, m) => {
-					this.logMessage(m);
-			})
-			ipcRenderer.on('stderr', (e, m) => {
-					this.logMessage(m);
-			})
-	},
-	methods: {
-		logMessage (msg) {
-			msg = String(msg)
-			msg.split("\n").forEach( (a ) => {
-				store.dispatch('logMsg', ansicolor.strip(a.trim())); 
-				})
-		},
-	},
-}
+  data() {
+    return {
+      store: store
+    };
+  },
+  created: function() {
+    ipcRenderer.on('message', (e, m) => {
+      this.logMessage(m);
+    });
+    ipcRenderer.on('stderr', (e, m) => {
+      this.logMessage(m);
+    });
+  },
+  methods: {
+    logMessage(msg) {
+      msg = String(msg);
+      msg.split('\n').forEach(a => {
+        store.dispatch('logMsg', ansicolor.strip(a.trim()));
+      });
+    }
+  }
+};
 </script>
 <template>
 		<b-card title="Log" bg-variant="light" style="height: 100vh; overflow: auto">

@@ -1,18 +1,18 @@
 <script>
-import store from '@/store'
+import store from '@/store';
 export default {
-	data () {
-		return {
-			tasks: store.state.tasks,
-			state: store.state
-		}
-	},
-	methods:{
-		select(id){
-			store.dispatch('selectTask', id);
-		},
-	},
-}
+  data() {
+    return {
+      tasks: store.state.tasks,
+      state: store.state
+    };
+  },
+  methods: {
+    select(id) {
+      store.dispatch('selectTask', id);
+    }
+  }
+};
 </script>
 
 <template>
@@ -32,4 +32,3 @@ export default {
 		</b-list-group>
 	</b-form-group>
 </template>
-
