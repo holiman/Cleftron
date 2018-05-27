@@ -62,7 +62,7 @@ export default {
     return {
       store: store,
       disabled: false, 
-      errs : []
+      errs : [],
     }
   },
   components: {
@@ -78,13 +78,12 @@ export default {
       evt.preventDefault();
     },
 
-    approve (evt) {
+    approve (evt, x) {
       if (!this.checkForm(evt)){ return; }
       const response = {
         "approved" : true,
         "transaction" : store.state.selected.obj.params[0].transaction,
         "password" : store.state.selected.password,
-        
       }
       ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
       store.dispatch('taskDone');
@@ -98,9 +97,6 @@ export default {
       store.dispatch('taskDone');
 
     }
-  },
-  created: function() {
-
   },
   computed: {
     passphrase: {
@@ -232,9 +228,6 @@ export default {
                         label-size="mg"
                         label-class="font-weight-bold pt-0"
                         class="mb-0">
-              <b-container>
-
-              </b-container>
               <b-form-group horizontal
                               label="From:"
                               label-class="text-sm-right"
@@ -306,21 +299,34 @@ export default {
                   </b-form-textarea>
                   <b-alert v-if="errors.first('data')" show variant="danger">{{ errors.first('data') }}</b-alert>
               </b-form-group>
+            </b-form-group>
+            <b-form-group vertical
+                        breakpoint="lg"
+                        label="Action"
+                        label-size="mg"
+                        label-class="font-weight-bold pt-0"
+                        class="mb-0">
+
+
               <b-form-group horizontal
-                              label="Passphrase:"
+                              label="Password:"
                               label-class="text-sm-right"
                               label-for="pass">
-                  <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
+
+                  <b-input-group>
+                    <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
+                      <b-button v-on:click="approve()" variant="primary">Approve</b-button>
+  
+                </b-input-group>
+
+  
+
               </b-form-group>             
-            </b-form-group>
-            
+            </b-form-group>            
             <b-container>
                 <b-row class="text-center">
                     <b-col class="py-3">
                     <b-button v-on:click="reject" variant="danger">Reject</b-button>
-                    </b-col>
-                    <b-col class="py-3">
-                    <b-button v-on:click="approve" variant="primary">Approve</b-button>
                     </b-col>
                 </b-row>
             </b-container>

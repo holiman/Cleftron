@@ -2,7 +2,6 @@ import { Notification, Menu, BrowserWindow, Tray, app, nativeImage, ipcMain, dia
 
 import fs from 'fs'
 import path from 'path'
-//import store from '../renderer/store'
 import StringDecoder from 'string_decoder'
 import jsonrpc from 'jsonrpc-lite'
 import { spawn } from 'cross-spawn'
@@ -13,7 +12,6 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
-//let tray
 let clef
 
 const winURL = process.env.NODE_ENV === 'development'
