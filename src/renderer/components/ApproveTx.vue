@@ -8,6 +8,7 @@ import Vue from 'vue';
 import VeeValidate from 'vee-validate';
 import { Validator } from 'vee-validate';
 import { keccak256 } from 'eth-lib/lib/hash.js';
+
 Vue.use(VeeValidate);
 
 const ethValidators = {
@@ -93,7 +94,7 @@ export default {
       evt.preventDefault();
     },
 
-    approve(evt) {
+    approve(evt, x) {
       if (!this.checkForm(evt)) {
         return;
       }
@@ -120,7 +121,6 @@ export default {
       store.dispatch('taskDone');
     }
   },
-  created: function() {},
   computed: {
     passphrase: {
       get() {
@@ -251,9 +251,6 @@ export default {
                         label-size="mg"
                         label-class="font-weight-bold pt-0"
                         class="mb-0">
-              <b-container>
-
-              </b-container>
               <b-form-group horizontal
                               label="From:"
                               label-class="text-sm-right"
@@ -267,7 +264,7 @@ export default {
                     <b-form-input v-validate="'required|eth_hex|eth_address|eth_checksum'" name='from' v-model="from" plaintext id="fromInput"></b-form-input>
                     <b-alert v-if="errors.first('from')" show variant="danger">{{ errors.first('from') }}</b-alert>
                   </b-input-group>
-                  
+
               </b-form-group>
               <b-form-group horizontal
                               label="To:"
@@ -280,7 +277,7 @@ export default {
                     <b-form-input v-model="to" v-validate="'eth_hex|eth_address|eth_checksum'" plaintext id="toInput" name='to'></b-form-input>
                      <b-alert v-if="errors.first('to')" show variant="danger">{{ errors.first('to') }}</b-alert>
                   </b-input-group>
-                  
+
               </b-form-group>
               <b-form-group horizontal
                               label="Value:"
@@ -317,7 +314,7 @@ export default {
                               label-for="dataInput">
                   <b-form-textarea
                               :disabled="disabled"
-                              v-model="txdata" 
+                              v-model="txdata"
                               id="textarea1"
                               placeholder="0x0"
                               :rows="4"
@@ -325,21 +322,34 @@ export default {
                   </b-form-textarea>
                   <b-alert v-if="errors.first('data')" show variant="danger">{{ errors.first('data') }}</b-alert>
               </b-form-group>
+            </b-form-group>
+            <b-form-group vertical
+                        breakpoint="lg"
+                        label="Action"
+                        label-size="mg"
+                        label-class="font-weight-bold pt-0"
+                        class="mb-0">
+
+
               <b-form-group horizontal
-                              label="Passphrase:"
+                              label="Password:"
                               label-class="text-sm-right"
                               label-for="pass">
-                  <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
-              </b-form-group>             
+
+                  <b-input-group>
+                    <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
+                      <b-button v-on:click="approve()" variant="primary">Approve</b-button>
+
+                </b-input-group>
+
+
+
+              </b-form-group>
             </b-form-group>
-            
             <b-container>
                 <b-row class="text-center">
                     <b-col class="py-3">
                     <b-button v-on:click="reject" variant="danger">Reject</b-button>
-                    </b-col>
-                    <b-col class="py-3">
-                    <b-button v-on:click="approve" variant="primary">Approve</b-button>
                     </b-col>
                 </b-row>
             </b-container>

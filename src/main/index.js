@@ -11,10 +11,10 @@ import {
 
 import fs from 'fs';
 import path from 'path';
-//import store from '../renderer/store'
 import StringDecoder from 'string_decoder';
 import jsonrpc from 'jsonrpc-lite';
 import { spawn } from 'cross-spawn';
+
 const decoder = new StringDecoder.StringDecoder('utf8');
 
 if (process.env.NODE_ENV !== 'development') {
@@ -24,7 +24,6 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow;
-//let tray
 let clef;
 
 const winURL =
