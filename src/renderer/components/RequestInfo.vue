@@ -1,12 +1,12 @@
 <script>
-import store from '@/store'
+import store from '@/store';
 export default {
-  data () {
+  data() {
     return {
       store: store
-    }
+    };
   }
-}
+};
 </script>
 
 <template>
@@ -37,4 +37,3 @@ export default {
     </b-form-group>
 </b-form-group>
 </template>
-

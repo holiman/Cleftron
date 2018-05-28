@@ -1,198 +1,221 @@
 <script>
-import store from '@/store'
-import jsonrpc from 'jsonrpc-lite'
-import { ipcRenderer } from 'electron'
-import Blockie from './Blockie.vue'
-import RequestInfo from './RequestInfo.vue'
+import store from '@/store';
+import jsonrpc from 'jsonrpc-lite';
+import { ipcRenderer } from 'electron';
+import Blockie from './Blockie.vue';
+import RequestInfo from './RequestInfo.vue';
 import Vue from 'vue';
 import VeeValidate from 'vee-validate';
-import {  Validator } from 'vee-validate';
-import { keccak256 } from "eth-lib/lib/hash.js";
+import { Validator } from 'vee-validate';
+import { keccak256 } from 'eth-lib/lib/hash.js';
+
 Vue.use(VeeValidate);
 
 const ethValidators = {
-  isHex(value){
+  isHex(value) {
     var v = String(value);
-    if(v.length < 2){ return false; }
-    var prefix = v.slice(0,2).toLowerCase();
-    if(prefix != "0x"){ return false; }
+    if (v.length < 2) {
+      return false;
+    }
+    var prefix = v.slice(0, 2).toLowerCase();
+    if (prefix != '0x') {
+      return false;
+    }
     var hex = v.slice(2);
-    if (!/^[0-9a-f]*$/i.test(hex)) { return false; } 
+    if (!/^[0-9a-f]*$/i.test(hex)) {
+      return false;
+    }
     return true;
-  }, 
-  isAddr(v){
-    if (!ethValidators.isHex(v)){ return false }
-    var hex = String(v).slice(2);
-    if (!/^[0-9a-f]{40}$/i.test(hex)) { return false; } 
-    return true
   },
-  isChecksummed(v){
-    if (!ethValidators.isAddr(v)){ return false; }
+  isAddr(v) {
+    if (!ethValidators.isHex(v)) {
+      return false;
+    }
+    var hex = String(v).slice(2);
+    if (!/^[0-9a-f]{40}$/i.test(hex)) {
+      return false;
+    }
+    return true;
+  },
+  isChecksummed(v) {
+    if (!ethValidators.isAddr(v)) {
+      return false;
+    }
     var address = String(v).slice(2);
     var addrLC = address.toLowerCase();
     var addrUC = address.toUpperCase();
-    var addressHash = keccak256(addrLC).replace(/^0x/i,'');
-    for (var i = 0; i < 40; i++ ) {
-        // the nth letter should be uppercase if the nth digit of casemap is 1
-        if (parseInt(addressHash[i], 16) > 7){
-          if (addrUC[i] !== address[i]){ return false; }
-        } else{
-          if (addrLC[i] !== address[i]) { return false; }
+    var addressHash = keccak256(addrLC).replace(/^0x/i, '');
+    for (var i = 0; i < 40; i++) {
+      // the nth letter should be uppercase if the nth digit of casemap is 1
+      if (parseInt(addressHash[i], 16) > 7) {
+        if (addrUC[i] !== address[i]) {
+          return false;
         }
+      } else {
+        if (addrLC[i] !== address[i]) {
+          return false;
+        }
+      }
     }
-    return true
+    return true;
   }
-}
+};
 
 Validator.extend('eth_hex', {
   getMessage: field => 'Not valid hex.',
-  validate: value => ethValidators.isHex(value), 
+  validate: value => ethValidators.isHex(value)
 });
 Validator.extend('eth_address', {
   getMessage: field => 'Not an ethereum address',
-  validate: value => ethValidators.isAddr(value), 
+  validate: value => ethValidators.isAddr(value)
 });
 Validator.extend('eth_checksum', {
   getMessage: field => 'Incorrect checksum',
-  validate: value => ethValidators.isChecksummed(value), 
+  validate: value => ethValidators.isChecksummed(value)
 });
 
 export default {
-  data () {
+  data() {
     return {
       store: store,
-      disabled: false, 
-      errs : [],
-    }
+      disabled: false,
+      errs: []
+    };
   },
   components: {
     Blockie,
     RequestInfo
   },
   methods: {
-
     checkForm(evt) {
       // TODO check for errors
       this.errs = [];
-      if(!this.errs.length) return true;
+      if (!this.errs.length) return true;
       evt.preventDefault();
     },
 
-    approve (evt, x) {
-      if (!this.checkForm(evt)){ return; }
-      const response = {
-        "approved" : true,
-        "transaction" : store.state.selected.obj.params[0].transaction,
-        "password" : store.state.selected.password,
+    approve(evt, x) {
+      if (!this.checkForm(evt)) {
+        return;
       }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
+      const response = {
+        approved: true,
+        transaction: store.state.selected.obj.params[0].transaction,
+        password: store.state.selected.password
+      };
+      ipcRenderer.send(
+        'response',
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
+      );
       store.dispatch('taskDone');
     },
-    reject (evt) {
+    reject(evt) {
       const response = {
-        "approved" : false,
-        "transaction" : store.state.selected.obj.params[0].transaction
-      }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
+        approved: false,
+        transaction: store.state.selected.obj.params[0].transaction
+      };
+      ipcRenderer.send(
+        'response',
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
+      );
       store.dispatch('taskDone');
-
     }
   },
   computed: {
     passphrase: {
-      get () {
-        return store.state.selected.password
+      get() {
+        return store.state.selected.password;
       },
-      set (value) {
-        let data = store.state.selected.obj
-        store.state.selected.password = value
+      set(value) {
+        let data = store.state.selected.obj;
+        store.state.selected.password = value;
         store.dispatch('updateObject', data);
       }
     },
     from: {
-      get () {
-        return store.state.selected.obj.params[0].transaction.from
+      get() {
+        return store.state.selected.obj.params[0].transaction.from;
       },
-      set (value) {
-        let data = store.state.selected.obj
-        data.params[0].transaction.from = value
+      set(value) {
+        let data = store.state.selected.obj;
+        data.params[0].transaction.from = value;
         store.dispatch('updateObject', data);
       }
     },
     to: {
-      get () {
-        return store.state.selected.obj.params[0].transaction.to
+      get() {
+        return store.state.selected.obj.params[0].transaction.to;
       },
-      set (value) {
-        let data = store.state.selected.obj
-        data.params[0].transaction.to = value
+      set(value) {
+        let data = store.state.selected.obj;
+        data.params[0].transaction.to = value;
         store.dispatch('updateObject', data);
       }
     },
     gas: {
-      get () {
-        return store.state.selected.obj.params[0].transaction.gas
+      get() {
+        return store.state.selected.obj.params[0].transaction.gas;
       },
-      set (value) {
-        let data = store.state.selected.obj
-        data.params[0].transaction.gas = value
+      set(value) {
+        let data = store.state.selected.obj;
+        data.params[0].transaction.gas = value;
         store.dispatch('updateObject', data);
       }
     },
     gasPrice: {
-      get () {
-        return store.state.selected.obj.params[0].transaction.gasPrice
+      get() {
+        return store.state.selected.obj.params[0].transaction.gasPrice;
       },
-      set (value) {
-        let data = store.state.selected.obj
-        data.params[0].transaction.gasPrice = value
+      set(value) {
+        let data = store.state.selected.obj;
+        data.params[0].transaction.gasPrice = value;
         store.dispatch('updateObject', data);
       }
     },
     nonce: {
-      get () {
-        return store.state.selected.obj.params[0].transaction.nonce
+      get() {
+        return store.state.selected.obj.params[0].transaction.nonce;
       },
-      set (value) {
-        let data = store.state.selected.obj
-        data.params[0].transaction.nonce = value
+      set(value) {
+        let data = store.state.selected.obj;
+        data.params[0].transaction.nonce = value;
         store.dispatch('updateObject', data);
       }
     },
     value: {
-      get () {
-        return store.state.selected.obj.params[0].transaction.value
+      get() {
+        return store.state.selected.obj.params[0].transaction.value;
       },
-      set (value) {
-        let data = store.state.selected.obj
-        data.params[0].transaction.value = value
+      set(value) {
+        let data = store.state.selected.obj;
+        data.params[0].transaction.value = value;
         store.dispatch('updateObject', data);
       }
     },
     txdata: {
-      get () {
-        return store.state.selected.obj.params[0].transaction.data
+      get() {
+        return store.state.selected.obj.params[0].transaction.data;
       },
-      set (value) {
-        let data = store.state.selected.obj
-        data.params[0].transaction.data = value
+      set(value) {
+        let data = store.state.selected.obj;
+        data.params[0].transaction.data = value;
         store.dispatch('updateObject', data);
       }
     },
-    info_warnings:{
+    info_warnings: {
       get() {
-        var ci = store.state.selected.obj.params[0].call_info
-        return ci.filter( x => x.type !="Info");
+        var ci = store.state.selected.obj.params[0].call_info;
+        return ci.filter(x => x.type != 'Info');
       }
     },
-    info_notes:{
+    info_notes: {
       get() {
-        var ci = store.state.selected.obj.params[0].call_info
-        return ci.filter( x => x.type =="Info");
+        var ci = store.state.selected.obj.params[0].call_info;
+        return ci.filter(x => x.type == 'Info');
       }
-    },
-  }  
-}
+    }
+  }
+};
 </script>
 <template>
     <b-form>
@@ -241,7 +264,7 @@ export default {
                     <b-form-input v-validate="'required|eth_hex|eth_address|eth_checksum'" name='from' v-model="from" plaintext id="fromInput"></b-form-input>
                     <b-alert v-if="errors.first('from')" show variant="danger">{{ errors.first('from') }}</b-alert>
                   </b-input-group>
-                  
+
               </b-form-group>
               <b-form-group horizontal
                               label="To:"
@@ -254,7 +277,7 @@ export default {
                     <b-form-input v-model="to" v-validate="'eth_hex|eth_address|eth_checksum'" plaintext id="toInput" name='to'></b-form-input>
                      <b-alert v-if="errors.first('to')" show variant="danger">{{ errors.first('to') }}</b-alert>
                   </b-input-group>
-                  
+
               </b-form-group>
               <b-form-group horizontal
                               label="Value:"
@@ -291,7 +314,7 @@ export default {
                               label-for="dataInput">
                   <b-form-textarea
                               :disabled="disabled"
-                              v-model="txdata" 
+                              v-model="txdata"
                               id="textarea1"
                               placeholder="0x0"
                               :rows="4"
@@ -316,13 +339,13 @@ export default {
                   <b-input-group>
                     <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
                       <b-button v-on:click="approve()" variant="primary">Approve</b-button>
-  
+
                 </b-input-group>
 
-  
 
-              </b-form-group>             
-            </b-form-group>            
+
+              </b-form-group>
+            </b-form-group>
             <b-container>
                 <b-row class="text-center">
                     <b-col class="py-3">

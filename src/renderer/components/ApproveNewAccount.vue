@@ -1,35 +1,41 @@
 <script>
-import store from '@/store'
-import jsonrpc from 'jsonrpc-lite'
-import { ipcRenderer } from 'electron'
-import RequestInfo from './RequestInfo.vue'
+import store from '@/store';
+import jsonrpc from 'jsonrpc-lite';
+import { ipcRenderer } from 'electron';
+import RequestInfo from './RequestInfo.vue';
 
 export default {
-  data () {
+  data() {
     return {
       store: store
-    }
+    };
   },
   components: {
     RequestInfo
   },
   methods: {
-    approve (evt) {
+    approve(evt) {
       const response = {
-        "approved" : true
-      }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
+        approved: true
+      };
+      ipcRenderer.send(
+        'response',
+        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+      );
       store.dispatch('setUi', '');
     },
-    reject (evt) {
+    reject(evt) {
       const response = {
-        "approved" : false
-      }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
+        approved: false
+      };
+      ipcRenderer.send(
+        'response',
+        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+      );
       store.dispatch('setUi', '');
     }
   }
-}
+};
 </script>
 
 <template>
