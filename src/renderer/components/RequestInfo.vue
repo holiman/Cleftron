@@ -21,19 +21,19 @@ export default {
                     label-class="text-sm-right"
                     label-for="remote"
                     >
-        <b-form-input  plaintext :value="store.state.pending.params[0].meta.remote" id="remote"></b-form-input>
+        <b-form-input  plaintext :value="store.state.selected.obj.params[0].meta.remote" id="remote"></b-form-input>
     </b-form-group>
     <b-form-group horizontal
                     label="Transport:"
                     label-class="text-sm-right"
                     label-for="transport">
-        <b-form-input plaintext :value="store.state.pending.params[0].meta.scheme" id="transport"></b-form-input>
+        <b-form-input plaintext :value="store.state.selected.obj.params[0].meta.scheme" id="transport"></b-form-input>
     </b-form-group>
     <b-form-group horizontal
                     label="Local Enpoint:"
                     label-class="text-sm-right"
                     label-for="endpoint">
-        <b-form-input plaintext :value="store.state.pending.params[0].meta.local" id="endpoint"></b-form-input>
+        <b-form-input plaintext :value="store.state.selected.obj.params[0].meta.local" id="endpoint"></b-form-input>
     </b-form-group>
 </b-form-group>
 </template>

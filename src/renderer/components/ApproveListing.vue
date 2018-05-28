@@ -7,7 +7,7 @@ import Blockie from './Blockie.vue'
 export default {
   data () {
     return {
-      store: store
+      state: store.state
     }
   },
   components: {
@@ -17,17 +17,17 @@ export default {
   methods: {
     approve (evt) {
       const response = {
-        "accounts" : store.state.pending.params[0].accounts
+        "accounts" : store.state.selected.obj.params[0].accounts
       }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
-      store.dispatch('setUi', '');
+      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
+      store.dispatch('taskDone');
     },
     reject (evt) {
       const response = {
         "accounts" : [],
       }
-      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.pending.id, response)))
-      store.dispatch('setUi', '');
+      ipcRenderer.send('response',JSON.stringify(jsonrpc.success(store.state.selected.id, response)))
+      store.dispatch('taskDone');
     }
   },
   created: function() {
@@ -50,7 +50,7 @@ export default {
                         label-size="mg"
                         label-class="font-weight-bold pt-0"
                         class="mb-0">
-              <b-form-group v-for="item in store.state.pending.params[0].accounts" :key="item" horizontal
+              <b-form-group v-for="item in state.selected.obj.params[0].accounts" :key="item.address" horizontal
                               label="Address:"
                               label-class="text-sm-right"
                               label-for="address"

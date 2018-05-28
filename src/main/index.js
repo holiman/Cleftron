@@ -2,7 +2,6 @@ import { Notification, Menu, BrowserWindow, Tray, app, nativeImage, ipcMain, dia
 
 import fs from 'fs'
 import path from 'path'
-//import store from '../renderer/store'
 import StringDecoder from 'string_decoder'
 import jsonrpc from 'jsonrpc-lite'
 import { spawn } from 'cross-spawn'
@@ -13,7 +12,6 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
-let tray
 let clef
 
 const winURL = process.env.NODE_ENV === 'development'
@@ -24,7 +22,7 @@ const winURL = process.env.NODE_ENV === 'development'
 function setupTray(){
 
 	const iconPath = path.join(__static, 'blu-eth-48x48.png');
-	tray = new Tray(nativeImage.createFromPath(iconPath));
+	let tray = new Tray(nativeImage.createFromPath(iconPath));
 
 	const menu = Menu.buildFromTemplate([
 		{label: "Open", click: (item, window, event) => {
@@ -89,64 +87,37 @@ function createWindow () {
 			console.log(String(data));
 		});
 	})
-
-
-	let dispatchers = {
-		ApproveTx : function(payload){
-			mainWindow.webContents.send('addTx', payload);
-			note('Transaction Signing is awaiting review.');
-		},
-		ApproveExport: function(payload){
-			mainWindow.webContents.send('addExport', payload);
-			note('Account Export is awaiting review.');	  
-		},
-		ApproveImport: function(payload){  
-			mainWindow.webContents.send('addImport', payload);
-			note('Account Import is awaiting review.');
-		},
-	 	ApproveSignData: function(payload) {
-			mainWindow.webContents.send('addSignData', payload);
-			note('Message signing is awaiting review.');
-		}, 
-		ApproveListing: function(payload) {
-			mainWindow.webContents.send('addListing', payload);
-			note('Account listing is awaiting review.');
-		},
-	 	ApproveNewAccount: function(payload){
-			mainWindow.webContents.send('addNewAccount', payload);
-			note('New account request is awaiting review.');	 		
-	 	},
-	 	ShowInfo: function(payload){
-			note(payload.params[0].text, true);
-	 	},
-	 	ShowError: function(payload){
-			note(payload.params[0].text, true);
-	 	},
-		OnApprovedTx: function(payload){
-			note('Signed '+payload.params[0].tx.hash, true);
-			send(JSON.stringify(jsonrpc.success(payload.id,{})));
-		},
-		OnSignerStartup: function(payload){
-			var i = payload.params[0].info
-			note('Clef is up. Web: '+i.extapi_http +" IPC:" + i.extapi_ipc, true)
-			send(JSON.stringify(jsonrpc.success(payload.id,{})));
-		},
-	} 
-
+	let handlers = {
+		ApproveTx :          { msg: () => 'Transaction Signing is awaiting review.', ui:true},
+		ApproveExport:       { msg: () => 'Account Export is awaiting review.', ui:true},	
+		ApproveImport:       { msg: () => 'Account Import is awaiting review.', ui:true},
+		ApproveSignData:     { msg: () => 'Message signing is awaiting review.', ui:true},
+		ApproveListing:      { msg: () => 'Account listing is awaiting review.', ui:true},
+		ApproveNewAccount:   { msg: () => 'New account request is awaiting review.', ui:true},
+		// These ones do not have a separate UI
+		ShowInfo:            { msg: (data) => data.params[0].text},
+		ShowError:           { msg: (data) => data.params[0].text},
+		OnApprovedTx:        { msg: (data) => ('Signed '+data.params[0].tx.hash)},
+		OnSignerStartup:     { msg: (data) => ('Clef is up. Web: '+data.params[0].info.extapi_http +" IPC:" + data.params[0].info.extapi_ipc)},
+	}
 	clef.stdout.on('data', (data) => {
 		console.log(data.toString())
 		let rpc = jsonrpc.parse(decoder.end(data))
-		if(rpc.type === "request"){
-			let handler = dispatchers[rpc.payload.method]  
-			if(handler) {  
-				handler(rpc.payload) 
+		if (rpc.type != "request"){ console.log("wtf? "+ rpc); return;}
+		let payload = rpc.payload
+		let handler = handlers[payload.method]  
+		if(handler) { 
+			note(handler.msg(payload))
+			if (handler.ui){
+				mainWindow.webContents.send('ApprovalRequired', payload)
+			}else{
+				// ShowInfo, ShowError, OnSignerStartup, OnApprovedTx
+				send(JSON.stringify(jsonrpc.success(payload.id,{})));
 			}
-			else{
-				console.log("Missing handler for method "+rpc.payload.method);
-			}
-			return
+			return 
 		}
-		//mainWindow.webContents.send('message', data);
+		console.log("Missing handler for method "+payload.method);
+		return
 	});
 	
 	clef.on('exit', (code) => {

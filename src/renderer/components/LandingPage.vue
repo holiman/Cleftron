@@ -1,18 +1,20 @@
 <script>
-import ApproveTransaction from './ApproveTransaction.vue'
+import ApproveTx from './ApproveTx.vue'
 import ApproveExport from './ApproveExport.vue'
 import ApproveImport from './ApproveImport.vue'
 import ApproveListing from './ApproveListing.vue'
 import ApproveSignData from './ApproveSignData.vue'
 import ApproveNewAccount from './ApproveNewAccount'
 import Logger from './Logger.vue'
+import TaskQueue from './TaskQueue.vue'
 import { ipcRenderer } from 'electron'
 import Vue from 'vue'
 import store from '@/store'
 export default {
   components: {
+    TaskQueue, 
     Logger,
-    ApproveTransaction,
+    ApproveTx,
     ApproveExport,
     ApproveImport,
     ApproveListing,
@@ -26,31 +28,9 @@ export default {
       }
   },
   created: function() {
-      ipcRenderer.on('addTx', (e,m) => {
-        store.dispatch('addData', m)
-        store.dispatch('setUi', "ApproveTransaction")
-        
+      ipcRenderer.on('ApprovalRequired', (e,m) => {
+        store.dispatch('addData', m)        
       })
-      ipcRenderer.on('addExport', (e, m) => { 
-        store.dispatch('addData', m)
-        store.dispatch('setUi', "ApproveExport")
-      })
-      ipcRenderer.on('addImport', (e, m) => { 
-        store.dispatch('addData', m)
-        store.dispatch('setUi', "ApproveImport")
-      })
-      ipcRenderer.on('addListing', (e, m) => { 
-        store.dispatch('addData', m)
-        store.dispatch('setUi', "ApproveListing")
-      })
-      ipcRenderer.on('addSignData', (e, m) => { 
-        store.dispatch('addData', m)
-        store.dispatch('setUi', "ApproveSignData")
-      })
-      ipcRenderer.on('addNewAccount', (e, m) => { 
-        store.dispatch('addData', m)
-        store.dispatch('setUi', "ApproveNewAccount")
-      })       
       // Let the main process know the page is loaded
       ipcRenderer.send('channelsConfigured', 'ping')
     }
@@ -60,6 +40,7 @@ export default {
 
 <template>
   <div>
+    <taskQueue></taskQueue>
     <b-container fluid>
         <component :is="store.state.ui"></component>
     </b-container>
