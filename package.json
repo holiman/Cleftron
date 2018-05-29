@@ -6,26 +6,26 @@
   "license": "",
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder",
-    "build:dir": "node .electron-vue/build.js && electron-builder --dir",
+    "build": "node .electron-vue/build.js && cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true electron-builder",
+    "build:dir": "node .electron-vue/build.js && cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "dev": "node .electron-vue/dev-runner.js",
     "pack": "npm run pack:main && npm run pack:renderer",
-    "pack:main":
-      "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
-    "pack:renderer":
-      "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
+    "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
+    "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "",
     "precommit": "pretty-quick --staged"
   },
   "build": {
     "productName": "cleftron",
-    "appId": "org.ethereum.electron-vue",
+    "appId": "org.ethereum.cleftron",
     "directories": {
       "output": "build"
     },
-    "files": ["dist/electron/**/*"],
+    "files": [
+      "dist/electron/**/*"
+    ],
     "dmg": {
       "contents": [
         {
@@ -54,8 +54,9 @@
   "dependencies": {
     "ansicolor": "^1.1.72",
     "bignumber.js": "^7.0.1",
-    "bootstrap-vue": "^2.0.0-rc.9",
+    "bootstrap-vue": "^2.0.0-rc.11",
     "cross-spawn": "^6.0.5",
+    "electron-args": "^0.1.0",
     "electron-sudo": "^4.0.12",
     "eth-lib": "^0.2.8",
     "ethereum-blockies": "^0.1.1",
@@ -68,7 +69,8 @@
     "vue": "^2.3.3",
     "vue-electron": "^1.0.6",
     "vue-router": "^2.5.3",
-    "vuex": "^2.3.1"
+    "vuex": "^2.3.1",
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.25.0",
@@ -87,7 +89,7 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "^1.8.6",
-    "electron-builder": "^19.19.1",
+    "electron-builder": "^20.15.1",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
     "eslint": "^4.19.1",
@@ -108,7 +110,7 @@
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^13.0.5",
     "vue-style-loader": "^3.0.1",
-    "vue-template-compiler": "^2.4.2",
+    "vue-template-compiler": "^2.5.16",
     "webpack": "^3.5.2",
     "webpack-dev-server": "^2.7.1",
     "webpack-hot-middleware": "^2.18.2",
