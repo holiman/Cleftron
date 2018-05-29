@@ -14,6 +14,22 @@ import path from 'path';
 import StringDecoder from 'string_decoder';
 import jsonrpc from 'jsonrpc-lite';
 import { spawn } from 'cross-spawn';
+import yargs from 'yargs';
+
+const argv = yargs
+  .usage('Usage: $0 [Cleftron options]')
+  .option({
+    clefbin: {
+      alias: 'c',
+      describe: 'Path to clef bin (optional)',
+      requiresArg: true,
+      nargs: 1,
+      type: 'string'
+    }
+  })
+  .help('h')
+  .alias('h', 'help')
+  .parse(process.argv.slice(1));
 
 const decoder = new StringDecoder.StringDecoder('utf8');
 
@@ -176,13 +192,16 @@ function createWindow() {
 }
 
 app.on('ready', function() {
-  let clefpath = '/home/user/tools/clef/clef';
+  startClef();
+  createWindow();
+});
 
-  if (process.argv[1] === '--clefbin') {
-    clefpath = process.argv[2];
-  }
+function startClef() {
+  let clefpath;
 
-  if (!clefpath) {
+  if (argv.clefbin) {
+    clefpath = argv.clefbin;
+  } else {
     clefpath = dialog.showOpenDialog({
       title: 'Select Clef Binary',
       filters: [
@@ -200,12 +219,11 @@ app.on('ready', function() {
       '--ipcdisable',
       '--stdio-ui'
     ]);
-  } catch (e) {
-    console.log(e);
-    throw e;
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 
-  createWindow();
   let fd = require('fs').createReadStream(clefpath);
   let hash = require('crypto').createHash('sha256');
   hash.setEncoding('hex');
@@ -219,7 +237,7 @@ app.on('ready', function() {
     notify.show();
   });
   fd.pipe(hash);
-});
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
