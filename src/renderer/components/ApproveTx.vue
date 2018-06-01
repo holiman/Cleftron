@@ -1,53 +1,323 @@
+<template>
+  <b-form>
+    <p v-if="errs.length">
+      <strong>
+        Please correct the following
+        {{ errs.length }} {{ errs.length > 1 ? 'errors' : 'error' }}:
+      </strong>
+      <ul>
+        <li
+          v-for="error in errs"
+          :key="error">
+          {{ error }}
+        </li>
+      </ul>
+    </p>
+    <b-card
+      title="Approve Transaction"
+      bg-variant="light">
+      <RequestInfo />
+
+      <b-form-group
+        vertical
+        label="Call Info"
+        label-size="mg"
+        label-class="font-weight-bold pt-0"
+        class="mb-0">
+        <b-container />
+        <b-alert
+          v-for="item in info_warnings"
+          :key="item.message"
+          show
+          variant="danger">
+          {{ item.message }}
+        </b-alert>
+        <b-alert
+          v-for="item in info_notes"
+          :key="item.message"
+          show>
+          {{ item.message }}
+        </b-alert>
+      </b-form-group>
+
+      <b-form-group
+        vertical
+        label="Transaction Info"
+        label-size="mg"
+        label-class="font-weight-bold pt-0"
+        class="mb-0">
+        <b-form-group
+          horizontal
+          label="From:"
+          label-class="text-sm-right"
+          label-for="fromInput">
+          <b-input-group>
+            <blockie :address="from" />
+            <b-form-input
+              v-validate="'required|eth_hex|eth_address|eth_checksum'"
+              id="fromInput"
+              v-model="from"
+              :plaintext="!edit.from"
+              :state="fields.from && fields.from.valid ? true : false"
+              name="from" />
+            <b-form-invalid-feedback
+              :force-show="fields.from && !fields.from.valid">
+              {{ errors.first('from') }}
+            </b-form-invalid-feedback>
+            <b-form-checkbox
+              id="edit.from"
+              v-model="edit.from"
+              :class="{ 'checked': edit.from }"
+              @change.native="showEditWarning">
+              Edit
+            </b-form-checkbox>
+          </b-input-group>
+        </b-form-group>
+        <b-form-group
+          horizontal
+          label="To:"
+          label-class="text-sm-right"
+          label-for="toInput">
+          <b-input-group>
+            <blockie :address="to" />
+            <b-form-input
+              v-validate="'eth_hex|eth_address|eth_checksum'"
+              id="toInput"
+              v-model="to"
+              :plaintext="!edit.to"
+              :state="fields.to && fields.to.valid ? true : false"
+              stacked
+              name="to" />
+            <b-form-invalid-feedback
+              :force-show="fields.to && !fields.to.valid">
+              {{ errors.first('to') }}
+            </b-form-invalid-feedback>
+            <b-form-checkbox
+              id="editTo"
+              v-model="edit.to"
+              :class="{ 'checked': edit.to }"
+              @change.native="showEditWarning">
+              Edit
+            </b-form-checkbox>
+          </b-input-group>
+        </b-form-group>
+        <b-form-group
+          horizontal
+          label="Value:"
+          label-class="text-sm-right"
+          label-for="valueInput">
+          <b-form-input
+            v-validate="'required|eth_hex'"
+            id="valueInput"
+            v-model="value"
+            :disabled="disabled"
+            :plaintext="!edit.value"
+            :state="fields.value && fields.value.valid ? true : false"
+            name="value" />
+          <b-form-invalid-feedback
+            :force-show="fields.value && !fields.value.valid">
+            {{ errors.first('value') }}
+          </b-form-invalid-feedback>
+          <b-form-checkbox
+            id="editValue"
+            v-model="edit.value"
+            :class="{ 'checked': edit.value }"
+            @change.native="showEditWarning">
+            Edit
+          </b-form-checkbox>
+        </b-form-group>
+        <b-form-group
+          label="Gas:"
+          label-class="text-sm-right"
+          label-for="gasInput"
+          horizontal>
+          <b-form-input
+            v-validate="'required|eth_hex'"
+            id="gasInput"
+            v-model="gas"
+            :disabled="disabled"
+            :plaintext="!edit.gas"
+            :state="fields.gas && fields.gas.valid ? true : false"
+            name="gas" />
+          <b-form-invalid-feedback
+            :force-show="fields.gas && !fields.gas.valid">
+            {{ errors.first('gas') }}
+          </b-form-invalid-feedback>
+          <b-form-checkbox
+            id="editGas"
+            v-model="edit.gas"
+            :class="{ 'checked': edit.gas }"
+            @change.native="showEditWarning">
+            Edit
+          </b-form-checkbox>
+        </b-form-group>
+        <b-form-group
+          label="Gas Price:"
+          label-class="text-sm-right"
+          label-for="gasPriceInput"
+          horizontal>
+          <b-form-input
+            v-validate="'required|eth_hex'"
+            id="gasPriceInput"
+            v-model="gasPrice"
+            :disabled="disabled"
+            :plaintext="!edit.gasPrice"
+            :state="fields.gasPrice && fields.gasPrice.valid ? true : false"
+            name="gasPrice" />
+          <b-form-invalid-feedback
+            :force-show="fields.gasPrice && !fields.gasPrice.valid">
+            {{ errors.first('gasPrice') }}
+          </b-form-invalid-feedback>
+          <b-form-checkbox
+            id="editGasPrice"
+            v-model="edit.gasPrice"
+            :class="{ 'checked': edit.gasPrice }"
+            @change.native="showEditWarning">
+            Edit
+          </b-form-checkbox>
+        </b-form-group>
+        <b-form-group
+          label="Nonce:"
+          label-class="text-sm-right"
+          label-for="nonceInput"
+          horizontal>
+          <b-form-input
+            v-validate="'required|eth_hex'"
+            id="nonceInput"
+            v-model="nonce"
+            :disabled="disabled"
+            :plaintext="!edit.nonce"
+            :state="fields.nonce && fields.nonce.valid ? true : false"
+            name="nonce" />
+          <b-form-invalid-feedback
+            :force-show="fields.nonce && !fields.nonce.valid">
+            {{ errors.first('nonce') }}
+          </b-form-invalid-feedback>
+          <b-form-checkbox
+            id="editNonce"
+            v-model="edit.nonce"
+            :class="{ 'checked': edit.nonce }"
+            @change.native="showEditWarning">
+            Edit
+          </b-form-checkbox>
+        </b-form-group>
+        <b-form-group
+          label="Data:"
+          label-class="text-sm-right"
+          label-for="dataInput"
+          horizontal>
+          <b-form-textarea
+            v-validate="'eth_hex'"
+            id="textarea-data"
+            :rows="2"
+            :max-rows="6"
+            v-model="txData"
+            :disabled="disabled"
+            :plaintext="!edit.data"
+            :state="fields.data && fields.data.valid ? true : false"
+            placeholder="0x0"
+            name="data" />
+          <b-form-invalid-feedback
+            :force-show="fields.data && !fields.data.valid">
+            {{ errors.first('data') }}
+          </b-form-invalid-feedback>
+          <b-form-checkbox
+            id="editData"
+            v-model="edit.data"
+            :class="{ 'checked': edit.data }"
+            @change.native="showEditWarning">
+            Edit
+          </b-form-checkbox>
+        </b-form-group>
+      </b-form-group>
+      <b-form-group
+        vertical
+        label="Action"
+        label-size="mg"
+        label-class="font-weight-bold pt-0"
+        class="mb-0">
+        <b-form-group
+          horizontal
+          label="Password:"
+          label-class="text-sm-right"
+          label-for="pass">
+          <b-input-group>
+            <b-form-input
+              id="pass"
+              v-model="passphrase"
+              :disabled="disabled"
+              type="password" />
+            <b-button
+              variant="primary"
+              @:click="approve()">
+              Approve
+            </b-button>
+          </b-input-group>
+        </b-form-group>
+      </b-form-group>
+      <b-container>
+        <b-row class="text-center">
+          <b-col class="py-3">
+            <b-button
+              variant="danger"
+              @:click="reject">Reject</b-button>
+          </b-col>
+        </b-row>
+      </b-container>
+    </b-card>
+  </b-form>
+</template>
+
 <script>
+import { ipcRenderer, remote } from 'electron';
+import Vue from 'vue';
 import store from '@/store';
 import jsonrpc from 'jsonrpc-lite';
-import { ipcRenderer } from 'electron';
-import Blockie from './Blockie.vue';
-import RequestInfo from './RequestInfo.vue';
-import Vue from 'vue';
 import VeeValidate from 'vee-validate';
 import { Validator } from 'vee-validate';
 import { keccak256 } from 'eth-lib/lib/hash.js';
+import Blockie from './Blockie.vue';
+import RequestInfo from './RequestInfo.vue';
 
 Vue.use(VeeValidate);
 
 const ethValidators = {
-  isHex(value) {
-    var v = String(value);
-    if (v.length < 2) {
+  isHex(v) {
+    const value = String(v);
+    if (value.length < 2) {
       return false;
     }
-    var prefix = v.slice(0, 2).toLowerCase();
+    const prefix = value.slice(0, 2).toLowerCase();
     if (prefix != '0x') {
       return false;
     }
-    var hex = v.slice(2);
+    const hex = value.slice(2);
     if (!/^[0-9a-f]*$/i.test(hex)) {
       return false;
     }
     return true;
   },
-  isAddr(v) {
-    if (!ethValidators.isHex(v)) {
+  isAddr(value) {
+    if (!ethValidators.isHex(value)) {
       return false;
     }
-    var hex = String(v).slice(2);
+    const hex = String(value).slice(2);
     if (!/^[0-9a-f]{40}$/i.test(hex)) {
       return false;
     }
     return true;
   },
-  isChecksummed(v) {
-    if (!ethValidators.isAddr(v)) {
+  isChecksummed(value) {
+    if (!ethValidators.isAddr(value)) {
       return false;
     }
-    var address = String(v).slice(2);
+    var address = String(value).slice(2);
     var addrLC = address.toLowerCase();
     var addrUC = address.toUpperCase();
-    var addressHash = keccak256(addrLC).replace(/^0x/i, '');
+    var addrHash = keccak256(addrLC).replace(/^0x/i, '');
     for (var i = 0; i < 40; i++) {
       // the nth letter should be uppercase if the nth digit of casemap is 1
-      if (parseInt(addressHash[i], 16) > 7) {
+      if (parseInt(addrHash[i], 16) > 7) {
         if (addrUC[i] !== address[i]) {
           return false;
         }
@@ -83,7 +353,16 @@ export default {
     return {
       store: store,
       disabled: false,
-      errs: []
+      errs: [],
+      edit: {
+        from: false,
+        to: false,
+        gas: false,
+        gasPrice: false,
+        nonce: false,
+        value: false,
+        data: false
+      }
     };
   },
   computed: {
@@ -157,7 +436,7 @@ export default {
         store.dispatch('updateObject', data);
       }
     },
-    txdata: {
+    txData: {
       get() {
         return store.state.selected.obj.params[0].transaction.data;
       },
@@ -181,15 +460,16 @@ export default {
     }
   },
   methods: {
-    checkForm(evt) {
+    checkForm(event) {
       // TODO check for errors
       this.errs = [];
-      if (!this.errs.length) return true;
-      evt.preventDefault();
+      if (!this.errs.length) {
+        return true;
+      }
+      event.preventDefault();
     },
-
-    approve(evt) {
-      if (!this.checkForm(evt)) {
+    approve(event) {
+      if (!this.checkForm(event)) {
         return;
       }
       const response = {
@@ -213,235 +493,28 @@ export default {
         JSON.stringify(jsonrpc.success(store.state.selected.id, response))
       );
       store.dispatch('taskDone');
+    },
+    showEditWarning(event) {
+      if (event.target.checked) {
+        remote.dialog.showMessageBox({
+          type: 'warning',
+          message: 'Please be careful when editing your transaction.'
+        });
+      }
     }
   }
 };
 </script>
-<template>
-  <b-form>
-    <p v-if="errs.length">
-      <b>Please correct the following error(s):</b>
-      <ul>
-        <li
-          v-for="error in errs"
-          :key="error">
-          {{ error }}
-        </li>
-      </ul>
-    </p>
-    <b-card
-      title="Approve Transaction"
-      bg-variant="light">
-      <RequestInfo />
 
-      <b-form-group
-        vertical
-        breakpoint="lg"
-        label="Call Info"
-        label-size="mg"
-        label-class="font-weight-bold pt-0"
-        class="mb-0">
-        <b-container />
-        <b-alert
-          v-for="item in info_warnings"
-          :key="item.message"
-          show
-          variant="danger">
-          {{ item.message }}
-        </b-alert>
-        <b-alert
-          v-for="item in info_notes"
-          :key="item.message"
-          show>
-          {{ item.message }}
-        </b-alert>
-      </b-form-group>
-
-      <b-form-group
-        vertical
-        breakpoint="lg"
-        label="Transaction Info"
-        label-size="mg"
-        label-class="font-weight-bold pt-0"
-        class="mb-0">
-        <b-form-group
-          horizontal
-          label="From:"
-          label-class="text-sm-right"
-          label-for="fromInput">
-          <b-input-group>
-            <b-input-group-text slot="prepend">
-              <blockie :address="from" />
-            </b-input-group-text>
-            <b-form-input
-              v-validate="'required|eth_hex|eth_address|eth_checksum'"
-              id="fromInput"
-              v-model="from"
-              name="from"
-              plaintext />
-            <b-alert
-              v-if="errors.first('from')"
-              show
-              variant="danger">
-              {{ errors.first('from') }}
-            </b-alert>
-          </b-input-group>
-        </b-form-group>
-        <b-form-group
-          horizontal
-          label="To:"
-          label-class="text-sm-right"
-          label-for="toInput">
-          <b-input-group>
-            <b-input-group-text slot="prepend">
-              <blockie :address="to" />
-            </b-input-group-text>
-            <b-form-input
-              v-validate="'eth_hex|eth_address|eth_checksum'"
-              id="toInput"
-              v-model="to"
-              name="to"
-              plaintext />
-            <b-alert
-              v-if="errors.first('to')"
-              show
-              variant="danger">/>
-              {{ errors.first('to') }}
-            </b-alert>
-          </b-input-group>
-        </b-form-group>
-        <b-form-group
-          horizontal
-          label="Value:"
-          label-class="text-sm-right"
-          label-for="valueInput">
-          <b-form-input
-            v-validate="'required|eth_hex'"
-            id="valueInput"
-            v-model="value"
-            :disabled="disabled"
-            name="value" />
-          <b-alert
-            v-if="errors.first('value')"
-            show
-            variant="danger">
-            {{ errors.first('value') }}
-          </b-alert>
-        </b-form-group>
-        <b-form-group
-          label="Gas:"
-          label-class="text-sm-right"
-          label-for="gasInput"
-          horizontal>
-          <b-form-input
-            v-validate="'required|eth_hex'"
-            id="gasInput"
-            v-model="gas"
-            :disabled="disabled"
-            name="gas" />
-          <b-alert
-            v-if="errors.first('gas')"
-            show
-            variant="danger">
-            {{ errors.first('gas') }}
-          </b-alert>
-        </b-form-group>
-        <b-form-group
-          label="Gas price:"
-          label-class="text-sm-right"
-          label-for="gasPriceInput"
-          horizontal>
-          <b-form-input
-            v-validate="'required|eth_hex'"
-            id="gasPriceInput"
-            v-model="gasPrice"
-            :disabled="disabled"
-            name="gasPrice" />
-          <b-alert
-            v-if="errors.first('gasPrice')"
-            show
-            variant="danger">
-            {{ errors.first('gasPrice') }}
-          </b-alert>
-        </b-form-group>
-        <b-form-group
-          label="Nonce:"
-          label-class="text-sm-right"
-          label-for="nonceInput"
-          horizontal>
-          <b-form-input
-            v-validate="'required|eth_hex'"
-            id="nonceInput"
-            v-model="nonce"
-            :disabled="disabled"
-            name="nonce" />
-          <b-alert
-            v-if="errors.first('nonce')"
-            show
-            variant="danger">
-            {{ errors.first('nonce') }}
-          </b-alert>
-          <span>
-            {{ errors.first('nonce') }}
-          </span>
-        </b-form-group>
-        <b-form-group
-          label="Data:"
-          label-class="text-sm-right"
-          label-for="dataInput"
-          horizontal>
-          <b-form-textarea
-            v-validate="'eth_hex'"
-            id="textarea1"
-            :rows="4"
-            :max-rows="6"
-            v-model="txdata"
-            :disabled="disabled"
-            placeholder="0x0"
-            name="data" />
-          <b-alert
-            v-if="errors.first('data')"
-            show
-            variant="danger">
-            {{ errors.first('data') }}
-          </b-alert>
-        </b-form-group>
-      </b-form-group>
-      <b-form-group
-        vertical
-        breakpoint="lg"
-        label="Action"
-        label-size="mg"
-        label-class="font-weight-bold pt-0"
-        class="mb-0">
-        <b-form-group
-          horizontal
-          label="Password:"
-          label-class="text-sm-right"
-          label-for="pass">
-          <b-input-group>
-            <b-form-input
-              id="pass"
-              v-model="passphrase"
-              :disabled="disabled"
-              type="password" />
-            <b-button
-              variant="primary"
-              @:click="approve()">
-              Approve
-            </b-button>
-          </b-input-group>
-        </b-form-group>
-      </b-form-group>
-      <b-container>
-        <b-row class="text-center">
-          <b-col class="py-3">
-            <b-button
-              variant="danger"
-              @:click="reject">Reject</b-button>
-          </b-col>
-        </b-row>
-      </b-container>
-    </b-card>
-  </b-form>
-</template>
+<style>
+.form-control-plaintext.is-invalid {
+  border-bottom: 2px dotted red;
+}
+.custom-checkbox {
+  transform: scale(0.85);
+  opacity: 0.5;
+}
+.custom-checkbox.checked {
+  opacity: 1;
+}
+</style>
