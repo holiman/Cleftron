@@ -1,25 +1,31 @@
+<template>
+  <div :id="address" />
+</template>
+
 <script>
-const uuidv4 = require('uuid/v4');
 import store from '@/store';
 import makeBlockie from 'ethereum-blockies-base64';
+
 export default {
-  props: ['address'],
+  props: {
+    address: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
-      store: store,
-      uuid: ''
+      store: store
     };
-  },
-  created: function() {
-    this.uuid = uuidv4();
   },
   mounted: function() {
     const img = new Image(75, 75);
     img.src = makeBlockie(this.address);
     this.$el.appendChild(img);
+  },
+  updated: function() {
+    const img = this.$el.firstChild;
+    img.src = makeBlockie(this.address);
   }
 };
 </script>
-<template>
-  <div :id="this.uuid"></div>
-</template>

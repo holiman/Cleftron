@@ -1,3 +1,31 @@
+<template>
+  <b-form>
+    <b-card
+      title="Approve New Account"
+      bg-variant="light">
+      <RequestInfo />
+      <b-container>
+        <b-row class="text-center">
+          <b-col class="py-3">
+            <b-button
+              variant="danger"
+              @:click="reject">
+              Reject
+            </b-button>
+          </b-col>
+          <b-col class="py-3">
+            <b-button
+              variant="primary"
+              @:click="approve">
+              Approve
+            </b-button>
+          </b-col>
+        </b-row>
+      </b-container>
+    </b-card>
+  </b-form>
+</template>
+
 <script>
 import store from '@/store';
 import jsonrpc from 'jsonrpc-lite';
@@ -5,16 +33,16 @@ import { ipcRenderer } from 'electron';
 import RequestInfo from './RequestInfo.vue';
 
 export default {
+  components: {
+    RequestInfo
+  },
   data() {
     return {
       store: store
     };
   },
-  components: {
-    RequestInfo
-  },
   methods: {
-    approve(evt) {
+    approve() {
       const response = {
         approved: true
       };
@@ -24,7 +52,7 @@ export default {
       );
       store.dispatch('setUi', '');
     },
-    reject(evt) {
+    reject() {
       const response = {
         approved: false
       };
@@ -37,22 +65,3 @@ export default {
   }
 };
 </script>
-
-<template>
-    <b-form>
-        <b-card title="Approve New Account" bg-variant="light">
-            <RequestInfo></RequestInfo>
-            
-              <b-container>
-                <b-row class="text-center">
-                    <b-col class="py-3">
-                    <b-button v-on:click="reject" variant="danger">Reject</b-button>
-                    </b-col>
-                    <b-col class="py-3">
-                    <b-button v-on:click="approve" variant="primary">Approve</b-button>
-                    </b-col>
-                </b-row>
-              </b-container>
-        </b-card>
-    </b-form>
-</template>

@@ -1,10 +1,63 @@
+<template>
+  <b-form>
+    <b-card
+      title="Approve Account Import"
+      bg-variant="light">
+      <RequestInfo />
+      <b-form-group
+        horizontal
+        label="Old Passphrase:"
+        label-class="text-sm-right"
+        label-for="pass">
+        <b-form-input
+          id="pass"
+          v-model="passphrase"
+          :disabled="disabled"
+          type="password" />
+      </b-form-group>
+      <b-form-group
+        horizontal
+        label="New Passphrase:"
+        label-class="text-sm-right"
+        label-for="pass">
+        <b-form-input
+          id="pass"
+          v-model="passphrase"
+          :disabled="disabled"
+          type="password" />
+      </b-form-group>
+      <b-container>
+        <b-row class="text-center">
+          <b-col class="py-3">
+            <b-button
+              variant="danger"
+              @:click="reject">
+              Reject
+            </b-button>
+          </b-col>
+          <b-col class="py-3">
+            <b-button
+              variant="primary"
+              @:click="approve">
+              Approve
+            </b-button>
+          </b-col>
+        </b-row>
+      </b-container>
+    </b-card>
+  </b-form>
+</template>
+
 <script>
 import store from '@/store';
 import jsonrpc from 'jsonrpc-lite';
 import { ipcRenderer } from 'electron';
 import RequestInfo from './RequestInfo.vue';
-import Blockie from './Blockie.vue';
+
 export default {
+  components: {
+    RequestInfo
+  },
   data() {
     return {
       store: store,
@@ -12,11 +65,8 @@ export default {
       newpassphrase: ''
     };
   },
-  components: {
-    RequestInfo
-  },
   methods: {
-    approve(evt) {
+    approve() {
       const response = {
         approved: true
       };
@@ -26,7 +76,7 @@ export default {
       );
       store.dispatch('setUi', '');
     },
-    reject(evt) {
+    reject() {
       const response = {
         approved: false
       };
@@ -39,33 +89,3 @@ export default {
   }
 };
 </script>
-
-<template>
-    <b-form>
-        <b-card title="Approve Account Import" bg-variant="light">
-            <RequestInfo></RequestInfo>
-              <b-form-group horizontal
-                              label="Old Passphrase:"
-                              label-class="text-sm-right"
-                              label-for="pass">
-                  <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
-              </b-form-group>
-              <b-form-group horizontal
-                              label="New Passphrase:"
-                              label-class="text-sm-right"
-                              label-for="pass">
-                  <b-form-input type="password" v-model="passphrase" :disabled="disabled" id="pass"></b-form-input>
-              </b-form-group>
-              <b-container>
-                <b-row class="text-center">
-                    <b-col class="py-3">
-                    <b-button v-on:click="reject" variant="danger">Reject</b-button>
-                    </b-col>
-                    <b-col class="py-3">
-                    <b-button v-on:click="approve" variant="primary">Approve</b-button>
-                    </b-col>
-                </b-row>
-              </b-container>
-        </b-card>
-    </b-form>
-</template>

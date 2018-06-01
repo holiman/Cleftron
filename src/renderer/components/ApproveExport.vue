@@ -1,21 +1,72 @@
+<template>
+  <b-form>
+    <b-card
+      title="Approve Account Export"
+      bg-variant="light">
+      <RequestInfo />
+      <b-form-group
+        vertical
+        label="Account Info"
+        label-size="mg"
+        label-class="font-weight-bold pt-0"
+        class="mb-0">
+        <b-form-group
+          horizontal
+          label="Address:"
+          label-class="text-sm-right"
+          label-for="address">
+          <b-input-group>
+            <b-input-group-text slot="prepend">
+              <blockie :address="store.state.pending.params[0].address" />
+            </b-input-group-text>
+            <b-form-input
+              id="address"
+              :value="store.state.pending.params[0].address"
+              disabled />
+          </b-input-group>
+        </b-form-group>
+        <b-container>
+          <b-row class="text-center">
+            <b-col class="py-3">
+              <b-button
+                variant="danger"
+                @:click="reject">
+                Reject
+              </b-button>
+            </b-col>
+            <b-col class="py-3">
+              <b-button
+                variant="primary"
+                @:click="approve">
+                Approve
+              </b-button>
+            </b-col>
+          </b-row>
+        </b-container>
+      </b-form-group>
+    </b-card>
+  </b-form>
+</template>
+
 <script>
 import store from '@/store';
 import jsonrpc from 'jsonrpc-lite';
 import { ipcRenderer } from 'electron';
 import RequestInfo from './RequestInfo.vue';
 import Blockie from './Blockie.vue';
+
 export default {
+  components: {
+    Blockie,
+    RequestInfo
+  },
   data() {
     return {
       store: store
     };
   },
-  components: {
-    Blockie,
-    RequestInfo
-  },
   methods: {
-    approve(evt) {
+    approve() {
       const response = {
         approved: true
       };
@@ -25,7 +76,7 @@ export default {
       );
       store.dispatch('setUi', '');
     },
-    reject(evt) {
+    reject() {
       const response = {
         approved: false
       };
@@ -35,46 +86,6 @@ export default {
       );
       store.dispatch('setUi', '');
     }
-  },
-  created: function() {},
-  computed: {}
+  }
 };
 </script>
-
-<template>
-    <b-form>
-        <b-card title="Approve Account Export" bg-variant="light">
-            <RequestInfo></RequestInfo>
-            <b-form-group vertical
-                        breakpoint="lg"
-                        label="Account Info"
-                        label-size="mg"
-                        label-class="font-weight-bold pt-0"
-                        class="mb-0">
-              <b-form-group horizontal
-                              label="Address:"
-                              label-class="text-sm-right"
-                              label-for="address"
-                              >
-                  <b-input-group>
-                    <b-input-group-text slot="prepend">
-                      <blockie :address="store.state.pending.params[0].address"></blockie>
-                    </b-input-group-text>
-                    <b-form-input :value="store.state.pending.params[0].address" disabled id="address"></b-form-input>
-                  </b-input-group>                              
-                  
-              </b-form-group>
-              <b-container>
-                <b-row class="text-center">
-                    <b-col class="py-3">
-                    <b-button v-on:click="reject" variant="danger">Reject</b-button>
-                    </b-col>
-                    <b-col class="py-3">
-                    <b-button v-on:click="approve" variant="primary">Approve</b-button>
-                    </b-col>
-                </b-row>
-              </b-container>
-            </b-form-group>
-        </b-card>
-    </b-form>
-</template>
