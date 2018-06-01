@@ -8,8 +8,8 @@ import ApproveNewAccount from './ApproveNewAccount';
 import Logger from './Logger.vue';
 import TaskQueue from './TaskQueue.vue';
 import { ipcRenderer } from 'electron';
-import Vue from 'vue';
 import store from '@/store';
+
 export default {
   components: {
     TaskQueue,
@@ -37,13 +37,12 @@ export default {
 };
 </script>
 
-
 <template>
   <div>
-    <taskQueue></taskQueue>
+    <taskQueue />
     <b-container fluid>
-        <component :is="store.state.ui"></component>
+      <component :is="store.state.ui" />
     </b-container>
-    <logger></logger>
+    <logger />
   </div>
 </template>

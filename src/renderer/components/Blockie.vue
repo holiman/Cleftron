@@ -1,9 +1,15 @@
 <script>
-const uuidv4 = require('uuid/v4');
+import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import makeBlockie from 'ethereum-blockies-base64';
+
 export default {
-  props: ['address'],
+  props: {
+    address: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
       store: store,
@@ -20,6 +26,7 @@ export default {
   }
 };
 </script>
+
 <template>
-  <div :id="this.uuid"></div>
+  <div :id="uuid" />
 </template>
