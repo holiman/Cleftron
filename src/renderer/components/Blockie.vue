@@ -1,3 +1,7 @@
+<template>
+  <div :id="address" />
+</template>
+
 <script>
 import store from '@/store';
 import makeBlockie from 'ethereum-blockies-base64';
@@ -25,7 +29,3 @@ export default {
   }
 };
 </script>
-
-<template>
-  <div :id="address" />
-</template>
