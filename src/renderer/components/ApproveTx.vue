@@ -508,11 +508,14 @@ export default {
 
 <style>
 .form-control-plaintext.is-invalid {
-  border-bottom: 2px dotted red;
+  border-bottom: 1px dotted red;
 }
 .custom-checkbox {
   transform: scale(0.85);
   opacity: 0.5;
+}
+.custom-checkbox:hover {
+  opacity: 0.85;
 }
 .custom-checkbox.checked {
   opacity: 1;
