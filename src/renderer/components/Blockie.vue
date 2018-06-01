@@ -1,5 +1,4 @@
 <script>
-import uuidv4 from 'uuid/v4';
 import store from '@/store';
 import makeBlockie from 'ethereum-blockies-base64';
 
@@ -12,21 +11,21 @@ export default {
   },
   data() {
     return {
-      store: store,
-      uuid: ''
+      store: store
     };
-  },
-  created: function() {
-    this.uuid = uuidv4();
   },
   mounted: function() {
     const img = new Image(75, 75);
     img.src = makeBlockie(this.address);
     this.$el.appendChild(img);
+  },
+  updated: function() {
+    const img = this.$el.firstChild;
+    img.src = makeBlockie(this.address);
   }
 };
 </script>
 
 <template>
-  <div :id="uuid" />
+  <div :id="address" />
 </template>
