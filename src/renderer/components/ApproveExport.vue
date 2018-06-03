@@ -30,14 +30,14 @@
             <b-col class="py-3">
               <b-button
                 variant="danger"
-                @:click="reject">
+                @click="reject">
                 Reject
               </b-button>
             </b-col>
             <b-col class="py-3">
               <b-button
                 variant="primary"
-                @:click="approve">
+                @click="approve">
                 Approve
               </b-button>
             </b-col>
