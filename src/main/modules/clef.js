@@ -1,4 +1,4 @@
-import { Notification, dialog } from 'electron';
+import { app, Notification, dialog } from 'electron';
 import { spawn } from 'cross-spawn';
 import log from 'electron-log';
 import path from 'path';
@@ -38,23 +38,30 @@ export function startClef(argv) {
     throw error;
   }
 
-  notifyClefSha256(clefpath);
+  confirmClefSha256(clefpath);
 
   return clef;
 }
 
-function notifyClefSha256(clefpath) {
+function confirmClefSha256(clefpath) {
   let fd = require('fs').createReadStream(clefpath);
   let hash = require('crypto').createHash('sha256');
   hash.setEncoding('hex');
   fd.on('end', function() {
     hash.end();
-    const notify = new Notification({
-      title: 'Binary Sha256',
-      body: hash.read(),
-      silent: true
-    });
-    notify.show();
+    dialog.showMessageBox(
+      {
+        type: 'info',
+        message: `The clef binary has sha256-sum: ${hash.read()}`,
+        buttons: ['Cancel', 'Ok']
+      },
+      response => {
+        if (response === 0) {
+          log.warn('Cancelled sha256-sum confirm dialog. Quitting app.');
+          app.quit();
+        }
+      }
+    );
   });
   fd.pipe(hash);
 }
