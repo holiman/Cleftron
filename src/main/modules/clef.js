@@ -159,7 +159,10 @@ export function validateAndSendToClef(clef, message, mainWindow) {
     if (errors.length > 0) {
       const errorMessage = `Transaction is invalid: ${errors.join(', ')}`;
       log.error(errorMessage);
-      note(mainWindow, errorMessage);
+      dialog.showMessageBox({
+        type: 'error',
+        message: errorMessage
+      });
       return;
     }
 
