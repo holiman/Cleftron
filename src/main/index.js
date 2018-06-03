@@ -9,12 +9,12 @@ import {
   dialog
 } from 'electron';
 
-import fs from 'fs';
 import path from 'path';
 import StringDecoder from 'string_decoder';
 import jsonrpc from 'jsonrpc-lite';
 import { spawn } from 'cross-spawn';
 import yargs from 'yargs';
+import log from 'electron-log';
 
 const argv = yargs
   .usage('Usage: $0 [Cleftron options]')
@@ -47,44 +47,22 @@ const winURL =
     ? `http://localhost:9080`
     : `file://${__dirname}/index.html`;
 
-// Set up the systray icon
-function setupTray() {
-  const iconPath = path.join(__static, 'blu-eth-48x48.png');
-  let tray = new Tray(nativeImage.createFromPath(iconPath));
+app.on('ready', function() {
+  startClef();
+  createWindow();
+});
 
-  const menu = Menu.buildFromTemplate([
-    {
-      label: 'Open',
-      click: (item, window, event) => {
-        mainWindow.show();
-      }
-    },
-    { type: 'separator' },
-    {
-      label: 'Exit',
-      click: () => {
-        app.isQuiting = true;
-        app.quit();
-      }
-    }
-  ]);
-  tray.setContextMenu(menu);
-  tray.on('click', () => {
-    mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
-  });
-}
-
-// Display a notification to the user
-function note(text, surpressOnClick) {
-  let notify = new Notification({ title: 'Cleftron', body: text });
-  notify.show();
-  if (surpressOnClick) {
-    return;
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
   }
-  notify.on('click', () => {
-    mainWindow.show();
-  });
-}
+});
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow();
+  }
+});
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -94,107 +72,121 @@ function createWindow() {
   });
 
   mainWindow.loadURL(winURL);
-  //mainWindow.webContents.openDevTools()
+
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.openDevTools();
+  }
+
+  setupTray();
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-  mainWindow.on('show', () => {});
-  mainWindow.on('hide', () => {});
-  setupTray();
 
-  mainWindow.on('close', e => {
+  mainWindow.on('close', event => {
     if (!app.isQuiting) {
-      e.preventDefault();
-      e.sender.hide();
+      event.preventDefault();
+      event.sender.hide();
     }
   });
-  var send = function(data) {
-    console.log('->' + data);
+
+  const sendClef = function(data) {
+    log.info('send clef -> ' + data);
     clef.stdin.write(data);
     clef.stdin.write('\n');
   };
-  ipcMain.on('response', (e, m) => {
-    mainWindow.webContents.send('message', m);
-    send(m);
+
+  ipcMain.on('response', (event, message) => {
+    // If approving tx, validate before sending
+    if (message.approved && message.transaction) {
+      if (true) {
+        note('Transaction is not validate');
+        return;
+      }
+    }
+
+    mainWindow.webContents.send('message', message);
+    sendClef(message);
   });
+
   // From the landing page, we send 'channelsConfigured' when
-  // the receivers are configured, and ready to receive data
+  // the receivers are configured and ready to receive data
   ipcMain.once('channelsConfigured', () => {
     clef.stderr.on('data', data => {
       mainWindow.webContents.send('stderr', data);
-      console.log(String(data));
+      log.info(String(data));
     });
   });
-  let handlers = {
-    ApproveTx: {
-      msg: () => 'Transaction Signing is awaiting review.',
-      ui: true
-    },
-    ApproveExport: {
-      msg: () => 'Account Export is awaiting review.',
-      ui: true
-    },
-    ApproveImport: {
-      msg: () => 'Account Import is awaiting review.',
-      ui: true
-    },
-    ApproveSignData: {
-      msg: () => 'Message signing is awaiting review.',
-      ui: true
-    },
-    ApproveListing: {
-      msg: () => 'Account listing is awaiting review.',
-      ui: true
-    },
-    ApproveNewAccount: {
-      msg: () => 'New account request is awaiting review.',
-      ui: true
-    },
-    // These ones do not have a separate UI
-    ShowInfo: { msg: data => data.params[0].text },
-    ShowError: { msg: data => data.params[0].text },
-    OnApprovedTx: { msg: data => 'Signed ' + data.params[0].tx.hash },
-    OnSignerStartup: {
-      msg: data =>
-        'Clef is up. Web: ' +
-        data.params[0].info.extapi_http +
-        ' IPC:' +
-        data.params[0].info.extapi_ipc
-    }
-  };
+
   clef.stdout.on('data', data => {
-    console.log(data.toString());
-    let rpc = jsonrpc.parse(decoder.end(data));
+    log.info(data.toString());
+
+    const rpc = jsonrpc.parse(decoder.end(data));
+
     if (rpc.type != 'request') {
-      console.log('wtf? ' + rpc);
+      log.error('wtf? non-request rpc:' + rpc);
       return;
     }
+
     let payload = rpc.payload;
-    let handler = handlers[payload.method];
+    let handler = clefHandlers[payload.method];
+
     if (handler) {
       note(handler.msg(payload));
       if (handler.ui) {
         mainWindow.webContents.send('ApprovalRequired', payload);
       } else {
         // ShowInfo, ShowError, OnSignerStartup, OnApprovedTx
-        send(JSON.stringify(jsonrpc.success(payload.id, {})));
+        sendClef(JSON.stringify(jsonrpc.success(payload.id, {})));
       }
-      return;
+    } else {
+      log.error('Missing handler for method ' + payload.method);
     }
-    console.log('Missing handler for method ' + payload.method);
-    return;
   });
 
   clef.on('exit', code => {
-    throw code;
     mainWindow.webContents.send('message', `Child exited with code ${code}`);
+    throw code;
   });
 }
 
-app.on('ready', function() {
-  startClef();
-  createWindow();
-});
+const clefHandlers = {
+  ApproveTx: {
+    msg: () => 'Transaction Signing is awaiting review.',
+    ui: true
+  },
+  ApproveExport: {
+    msg: () => 'Account Export is awaiting review.',
+    ui: true
+  },
+  ApproveImport: {
+    msg: () => 'Account Import is awaiting review.',
+    ui: true
+  },
+  ApproveSignData: {
+    msg: () => 'Message signing is awaiting review.',
+    ui: true
+  },
+  ApproveListing: {
+    msg: () => 'Account listing is awaiting review.',
+    ui: true
+  },
+  ApproveNewAccount: {
+    msg: () => 'New account request is awaiting review.',
+    ui: true
+  },
+  // These ones do not have a separate UI
+  ShowInfo: { msg: data => data.params[0].text },
+  ShowError: { msg: data => data.params[0].text },
+  OnApprovedTx: { msg: data => 'Signed ' + data.params[0].tx.hash },
+  OnSignerStartup: {
+    msg: data =>
+      'Clef is up. Web: ' +
+      data.params[0].info.extapi_http +
+      ' IPC:' +
+      data.params[0].info.extapi_ipc
+  }
+};
 
 function startClef() {
   let clefpath;
@@ -220,10 +212,14 @@ function startClef() {
       '--stdio-ui'
     ]);
   } catch (error) {
-    console.log(error);
+    log.error(error);
     throw error;
   }
 
+  notifyClefSha256(clefpath);
+}
+
+function notifyClefSha256(clefpath) {
   let fd = require('fs').createReadStream(clefpath);
   let hash = require('crypto').createHash('sha256');
   hash.setEncoding('hex');
@@ -239,14 +235,43 @@ function startClef() {
   fd.pipe(hash);
 }
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
+// Set up the systray icon
+function setupTray() {
+  const iconPath = path.join(__static, 'blu-eth-48x48.png');
+  let tray = new Tray(nativeImage.createFromPath(iconPath));
 
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow();
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'Open',
+      click: () => {
+        mainWindow.show();
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Exit',
+      click: () => {
+        app.isQuiting = true;
+        app.quit();
+      }
+    }
+  ]);
+
+  tray.setContextMenu(menu);
+
+  tray.on('click', () => {
+    mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
+  });
+}
+
+// Display a notification to the user
+function note(text, surpressOnClick) {
+  let notify = new Notification({ title: 'Cleftron', body: text });
+  notify.show();
+  if (surpressOnClick) {
+    return;
   }
-});
+  notify.on('click', () => {
+    mainWindow.show();
+  });
+}

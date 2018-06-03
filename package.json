@@ -57,6 +57,7 @@
     "bootstrap-vue": "^2.0.0-rc.11",
     "cross-spawn": "^6.0.5",
     "electron-args": "^0.1.0",
+    "electron-log": "^2.2.14",
     "electron-sudo": "^4.0.12",
     "eth-lib": "^0.2.8",
     "ethereum-blockies-base64": "^1.0.1",

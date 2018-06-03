@@ -15,14 +15,13 @@ export default new Vuex.Store({
   },
   mutations: {
     addTask(state, task) {
-      // state.tasks[task.id] = task
       if (!state.selected.id) {
         state.selected = task;
         state.ui = state.selected.ui;
       }
 
-      // Since state.tasks in an object,we need to use this
-      // construct intead of
+      // Since state.tasks in an object,
+      // we need to use this construct instead of
       // state.tasks[task.id] = task
       // See https://vuejsdevelopers.com/2017/03/05/vue-js-reactivity/
 
@@ -44,7 +43,6 @@ export default new Vuex.Store({
       state.selected = state.tasks[keys[0]];
       state.ui = state.selected.ui;
     },
-
     addLog(state, data) {
       state.logMessages.push(data);
     },
@@ -64,10 +62,10 @@ export default new Vuex.Store({
       // Select by RPC ID
       commit('setSelectedTask', Number(data));
     },
-    taskDone({ state, commit }, data) {
+    taskDone({ commit }) {
       commit('taskDone');
     },
-    addData({ state, commit }, data) {
+    addData({ commit }, data) {
       commit('addTask', {
         strData: JSON.stringify(data),
         ui: data.method,
@@ -76,7 +74,7 @@ export default new Vuex.Store({
       });
     },
     // Update an object with new data, e.g. setting gasPrice
-    updateObject({ state, commit }, data) {
+    updateObject({ commit }, data) {
       commit('updateObject', data);
     },
     // addPassphrase({commit}, data){
@@ -87,17 +85,3 @@ export default new Vuex.Store({
     }
   }
 });
-
-/**
-{ "jsonrpc":"2.0",
- "id":2,
- "method":"ApproveTx",
- "params":[
- 	{	
- 		"transaction":{"from":"0xcf6cd422f9b45778ad8a564edfbf8abab96e363a","to":"0x07a565b7ed7d7a678680a4c162885bedbb695fe0","gas":"0x333","gasPrice":"0x123","value":"0x10","nonce":"0x0","data":"0x4401a6e40000000000000000000000000000000000000000000000000000000000000012","input":null},
- 		"call_info":[{"type":"WARNING","message":"Invalid checksum on to-address"},{"type":"Info","message":"safeSend(address: 0x0000000000000000000000000000000000000012)"}],
- 		"meta":{"remote":"127.0.0.1:57590","local":"localhost:8550","scheme":"HTTP/1.1"}
- 	}
- 	]}
-
-**/
