@@ -1,4 +1,4 @@
-import { app, Notification, dialog } from 'electron';
+import { app, dialog } from 'electron';
 import { spawn } from 'cross-spawn';
 import log from 'electron-log';
 import path from 'path';
@@ -67,10 +67,15 @@ function confirmClefSha256(clefpath) {
 }
 
 function sendClef(clef, data, mainWindow) {
-  log.info('send clef -> ' + data);
-  clef.stdin.write(data);
+  const message = JSON.stringify(data);
+  clef.stdin.write(message);
   clef.stdin.write('\n');
-  mainWindow.webContents.send('message', data);
+  mainWindow.webContents.send('message', message);
+  if (process.env.NODE_ENV === 'development') {
+    log.info('[dev] send clef -> ' + data);
+  } else {
+    log.info('Message sent to clef');
+  }
 }
 
 export function initClefEvents(clef, mainWindow) {
@@ -80,7 +85,7 @@ export function initClefEvents(clef, mainWindow) {
     const rpc = jsonrpc.parse(decoder.end(data));
 
     if (rpc.type !== 'request') {
-      log.error('non-request rpc:' + rpc);
+      log.error('Non-request rpc: ' + rpc);
       return;
     }
 
@@ -93,11 +98,7 @@ export function initClefEvents(clef, mainWindow) {
         mainWindow.webContents.send('ApprovalRequired', payload);
       } else {
         // ShowInfo, ShowError, OnSignerStartup, OnApprovedTx
-        sendClef(
-          clef,
-          JSON.stringify(jsonrpc.success(payload.id, {})),
-          mainWindow
-        );
+        sendClef(clef, jsonrpc.success(payload.id, {}), mainWindow);
       }
     } else {
       log.error('Missing handler for method ' + payload.method);
@@ -178,7 +179,7 @@ export function validateAndSendToClef(clef, message, mainWindow) {
             log.info('Edited transaction cancelled');
           } else if (response === 1) {
             log.info('Edited transaction confirmed');
-            sendClef(clef, message, mainWindow);
+            sendClef(clef, data, mainWindow);
           }
         }
       );
@@ -186,7 +187,7 @@ export function validateAndSendToClef(clef, message, mainWindow) {
     }
   }
 
-  sendClef(clef, message, mainWindow);
+  sendClef(clef, data, mainWindow);
 }
 
 function checkEditedTx(id) {
