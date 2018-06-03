@@ -53,27 +53,27 @@ export const ethValidators = {
 export function validateTx(tx) {
   let errors = [];
 
-  // Validate: to
-  if (!ethValidators.isHex(tx.to)) {
-    errors.push('To is not valid hex');
+  // Validate: from
+  if (!ethValidators.isHex(tx.from)) {
+    errors.push('From is not valid hex');
   }
-  if (!ethValidators.isAddr(tx.to)) {
-    errors.push('To is not an Ethereum address');
+  if (!ethValidators.isAddr(tx.from)) {
+    errors.push('From is not an Ethereum address');
   }
-  if (!ethValidators.isChecksummed(tx.to)) {
-    errors.push('To has an incorrect checksum');
+  if (!ethValidators.isChecksummed(tx.from)) {
+    errors.push('From has an incorrect checksum');
   }
 
-  // Validate: from
-  if (tx.from) {
-    if (!ethValidators.isHex(tx.from)) {
-      errors.push('From is not valid hex');
+  // Validate: to
+  if (tx.to) {
+    if (!ethValidators.isHex(tx.to)) {
+      errors.push('To is not valid hex');
     }
-    if (!ethValidators.isAddr(tx.from)) {
-      errors.push('From is not an Ethereum address');
+    if (!ethValidators.isAddr(tx.to)) {
+      errors.push('To is not an Ethereum address');
     }
-    if (!ethValidators.isChecksummed(tx.from)) {
-      errors.push('From has an incorrect checksum');
+    if (!ethValidators.isChecksummed(tx.to)) {
+      errors.push('To has an incorrect checksum');
     }
   }
 
