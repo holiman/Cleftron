@@ -104,12 +104,8 @@ function createWindow() {
   };
 
   ipcMain.on('response', (event, message) => {
-    log.log(event);
-    log.log(message);
     // If approving tx...
-    log.error(1);
     if (message.result.approved && message.result.transaction) {
-      log.error(2);
       // Validate tx
       const errors = validateTx(message.result.transaction);
       if (errors.length > 0) {
@@ -120,7 +116,6 @@ function createWindow() {
       }
 
       // Notify user of changes to original tx params
-      log.error(3);
       const changed = checkEditedTx(message.id);
       if (changed.length > 0) {
         dialog.showMessageBox(
