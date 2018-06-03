@@ -143,8 +143,8 @@ function createWindow() {
       }
     }
 
-    // mainWindow.webContents.send('message', message);
-    // sendClef(message);
+    mainWindow.webContents.send('message', message);
+    sendClef(message);
   });
 
   // From the landing page, we send 'channelsConfigured' when
