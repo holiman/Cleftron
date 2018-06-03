@@ -15,6 +15,7 @@ import jsonrpc from 'jsonrpc-lite';
 import { spawn } from 'cross-spawn';
 import yargs from 'yargs';
 import log from 'electron-log';
+import { validateTx } from '../lib/ethValidators';
 
 const argv = yargs
   .usage('Usage: $0 [Cleftron options]')
@@ -64,6 +65,12 @@ app.on('activate', () => {
   }
 });
 
+// Note: Vuex state in main process is read-only
+global.vuexState = null;
+ipcMain.on('vuex-state', (event, state) => {
+  global.vuexState = state;
+});
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     height: 1000,
@@ -97,16 +104,52 @@ function createWindow() {
   };
 
   ipcMain.on('response', (event, message) => {
-    // If approving tx, validate before sending
-    if (message.approved && message.transaction) {
-      if (true) {
-        note('Transaction is not validate');
+    log.log(event);
+    log.log(message);
+    // If approving tx...
+    log.error(1);
+    if (message.result.approved && message.result.transaction) {
+      log.error(2);
+      // Validate tx
+      const errors = validateTx(message.result.transaction);
+      if (errors.length > 0) {
+        const errorMessage = `Transaction is invalid: ${errors.join(', ')}`;
+        log.error(errorMessage);
+        note(errorMessage);
+        return;
+      }
+
+      // Notify user of changes to original tx params
+      log.error(3);
+      const changed = checkEditedTx(message.id);
+      if (changed.length > 0) {
+        dialog.showMessageBox(
+          {
+            type: 'question',
+            message: `Please note your transaction has been edited: ${changed.join(
+              ', '
+            )}`,
+            buttons: [
+              'Cancel transaction',
+              'This looks OK. Approve transaction'
+            ]
+          },
+          response => {
+            if (response === 0) {
+              log.info('Edited transaction cancelled');
+            } else if (response === 1) {
+              log.info('Edited transaction confirmed');
+              mainWindow.webContents.send('message', message);
+              sendClef(message);
+            }
+          }
+        );
         return;
       }
     }
 
-    mainWindow.webContents.send('message', message);
-    sendClef(message);
+    // mainWindow.webContents.send('message', message);
+    // sendClef(message);
   });
 
   // From the landing page, we send 'channelsConfigured' when
@@ -123,8 +166,8 @@ function createWindow() {
 
     const rpc = jsonrpc.parse(decoder.end(data));
 
-    if (rpc.type != 'request') {
-      log.error('wtf? non-request rpc:' + rpc);
+    if (rpc.type !== 'request') {
+      log.error('Non-request rpc:' + rpc);
       return;
     }
 
@@ -274,4 +317,20 @@ function note(text, surpressOnClick) {
   notify.on('click', () => {
     mainWindow.show();
   });
+}
+
+function checkEditedTx(id) {
+  const task = global.vuexState.tasks[id];
+  const originalTx = task.originalObj.params[0].transaction;
+  const newTx = task.obj.params[0].transaction;
+  const txFields = ['from', 'to', 'value', 'nonce', 'gas', 'gasPrice', 'data'];
+  let changed = [];
+  for (const field in txFields) {
+    if (originalTx[field] !== newTx[field]) {
+      changed.push(
+        `${field} changed from ${originalTx[field]} to ${newTx[field]}`
+      );
+    }
+  }
+  return changed;
 }

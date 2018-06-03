@@ -1,8 +1,13 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import broadcaster from './broadcaster';
+
 Vue.use(Vuex);
+
 export default new Vuex.Store({
+  plugins: [broadcaster],
+  strict: process.env.NODE_ENV !== 'production',
   state: {
     // A text description about what UI to use
     ui: null,
@@ -15,6 +20,9 @@ export default new Vuex.Store({
   },
   mutations: {
     addTask(state, task) {
+      // Copy obj to originalObj to compare later if edited
+      task.originalObj = JSON.parse(JSON.stringify(task.obj));
+
       if (!state.selected.id) {
         state.selected = task;
         state.ui = state.selected.ui;

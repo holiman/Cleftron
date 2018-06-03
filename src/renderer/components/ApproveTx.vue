@@ -249,7 +249,7 @@
               type="password" />
             <b-button
               variant="primary"
-              @:click="approve()">
+              @click="approve()">
               Approve
             </b-button>
           </b-input-group>
@@ -260,7 +260,7 @@
           <b-col class="py-3">
             <b-button
               variant="danger"
-              @:click="reject">Reject</b-button>
+              @click="reject">Reject</b-button>
           </b-col>
         </b-row>
       </b-container>
@@ -275,70 +275,22 @@ import store from '@/store';
 import jsonrpc from 'jsonrpc-lite';
 import VeeValidate from 'vee-validate';
 import { Validator } from 'vee-validate';
-import { keccak256 } from 'eth-lib/lib/hash.js';
 import Blockie from './Blockie.vue';
 import RequestInfo from './RequestInfo.vue';
+import { ethValidators } from '../../lib/validators';
 
 Vue.use(VeeValidate);
-
-const ethValidators = {
-  isHex(v) {
-    const value = String(v);
-    if (value.length < 2) {
-      return false;
-    }
-    const prefix = value.slice(0, 2).toLowerCase();
-    if (prefix != '0x') {
-      return false;
-    }
-    const hex = value.slice(2);
-    if (!/^[0-9a-f]*$/i.test(hex)) {
-      return false;
-    }
-    return true;
-  },
-  isAddr(value) {
-    if (!ethValidators.isHex(value)) {
-      return false;
-    }
-    const hex = String(value).slice(2);
-    if (!/^[0-9a-f]{40}$/i.test(hex)) {
-      return false;
-    }
-    return true;
-  },
-  isChecksummed(value) {
-    if (!ethValidators.isAddr(value)) {
-      return false;
-    }
-    var address = String(value).slice(2);
-    var addrLC = address.toLowerCase();
-    var addrUC = address.toUpperCase();
-    var addrHash = keccak256(addrLC).replace(/^0x/i, '');
-    for (var i = 0; i < 40; i++) {
-      // the nth letter should be uppercase if the nth digit of casemap is 1
-      if (parseInt(addrHash[i], 16) > 7) {
-        if (addrUC[i] !== address[i]) {
-          return false;
-        }
-      } else {
-        if (addrLC[i] !== address[i]) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-};
 
 Validator.extend('eth_hex', {
   getMessage: () => 'Not valid hex.',
   validate: value => ethValidators.isHex(value)
 });
+
 Validator.extend('eth_address', {
   getMessage: () => 'Not an ethereum address',
   validate: value => ethValidators.isAddr(value)
 });
+
 Validator.extend('eth_checksum', {
   getMessage: () => 'Incorrect checksum',
   validate: value => ethValidators.isChecksummed(value)
@@ -460,16 +412,16 @@ export default {
     }
   },
   methods: {
-    checkForm(event) {
-      // TODO check for errors
-      this.errs = [];
-      if (!this.errs.length) {
+    formValid() {
+      if (this.errors.length > 0) {
+        return false;
+      } else {
         return true;
       }
-      event.preventDefault();
     },
     approve(event) {
-      if (!this.checkForm(event)) {
+      if (!this.formValid()) {
+        event.preventDefault();
         return;
       }
       const response = {
