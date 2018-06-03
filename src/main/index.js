@@ -145,7 +145,7 @@ function createWindow() {
   });
 
   clef.on('exit', code => {
-    mainWindow.webContents.send('message', `Child exited with code ${code}`);
+    mainWindow.webContents.send('message', `clef exited with code ${code}`);
     throw code;
   });
 }
