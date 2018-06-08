@@ -3,5 +3,20 @@
     "plugin:vue/recommended",
     "plugin:prettier/recommended",
     "eslint:recommended"
+  ],
+  "globals": {
+    "global": true,
+    "process": true,
+    "__dirname": true,
+    "__static": true,
+    "require": true
+  },
+  "overrides": [
+    {
+      "files": [".electron-vue/*.js", "src/main/index.dev.js"],
+      "rules": {
+        "no-console": 0
+      }
+    }
   ]
 }

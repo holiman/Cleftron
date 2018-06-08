@@ -38,8 +38,8 @@ export default {
     };
   },
   created: function() {
-    ipcRenderer.on('ApprovalRequired', (e, m) => {
-      store.dispatch('addData', m);
+    ipcRenderer.on('ApprovalRequired', (event, message) => {
+      store.dispatch('addData', message);
     });
     // Let the main process know the page is loaded
     ipcRenderer.send('channelsConfigured', 'ping');

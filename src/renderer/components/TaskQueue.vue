@@ -12,7 +12,7 @@
         :key="item.id"
         :active="state.selected.id==item.id"
         button
-        @:click="select(item.id)">
+        @click="select(item.id)">
         Request #{{ item.id }}:
         {{ item.ui }}
       </b-list-group-item>
