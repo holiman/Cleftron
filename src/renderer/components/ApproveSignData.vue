@@ -18,7 +18,7 @@
           label-for="address">
           <b-form-input
             id="address"
-            :value="store.state.pending.params[0].address"
+            :value="store.state.selected.obj.params[0].address"
             disabled />
         </b-form-group>
         <b-form-group
@@ -28,17 +28,17 @@
           label-for="rawdata">
           <b-form-input
             id="rawdata"
-            :value="store.state.pending.params[0].raw_data"
+            :value="store.state.selected.obj.params[0].raw_data"
             disabled />
         </b-form-group>
         <b-form-group
           horizontal
-          label="Hash:"
+         label="Hash:"
           label-class="text-sm-right"
           label-for="hash">
           <b-form-input
             id="hash"
-            :value="store.state.pending.params[0].hash"
+            :value="store.state.selected.obj.params[0].hash"
             disabled />
         </b-form-group>
         <b-form-group
@@ -48,7 +48,7 @@
           label-for="messagearea">
           <b-form-textarea
             id="messagearea"
-            :value="store.state.pending.params[0].message"
+            :value="store.state.selected.obj.params[0].message"
             :rows="2"
             :max-rows="6"
             placeholder="0x0"
@@ -122,9 +122,9 @@ export default {
       };
       ipcRenderer.send(
         'response',
-        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
       );
-      store.dispatch('setUi', '');
+      store.dispatch('taskDone');
     },
     reject() {
       const response = {
@@ -132,9 +132,9 @@ export default {
       };
       ipcRenderer.send(
         'response',
-        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
       );
-      store.dispatch('setUi', '');
+      store.dispatch('taskDone');
     }
   }
 };

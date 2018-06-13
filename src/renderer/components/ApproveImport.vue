@@ -72,9 +72,9 @@ export default {
       };
       ipcRenderer.send(
         'response',
-        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
       );
-      store.dispatch('setUi', '');
+      store.dispatch('taskDone');
     },
     reject() {
       const response = {
@@ -82,9 +82,9 @@ export default {
       };
       ipcRenderer.send(
         'response',
-        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
       );
-      store.dispatch('setUi', '');
+      store.dispatch('taskDone');
     }
   }
 };

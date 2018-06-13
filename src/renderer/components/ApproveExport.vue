@@ -17,11 +17,11 @@
           label-for="address">
           <b-input-group>
             <b-input-group-text slot="prepend">
-              <blockie :address="store.state.pending.params[0].address" />
+              <blockie :address="store.state.selected.obj.params[0].address" />
             </b-input-group-text>
             <b-form-input
               id="address"
-              :value="store.state.pending.params[0].address"
+              :value="store.state.selected.obj.params[0].address"
               disabled />
           </b-input-group>
         </b-form-group>
@@ -72,9 +72,9 @@ export default {
       };
       ipcRenderer.send(
         'response',
-        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
       );
-      store.dispatch('setUi', '');
+      store.dispatch('taskDone');
     },
     reject() {
       const response = {
@@ -82,9 +82,9 @@ export default {
       };
       ipcRenderer.send(
         'response',
-        JSON.stringify(jsonrpc.success(store.state.pending.id, response))
+        JSON.stringify(jsonrpc.success(store.state.selected.id, response))
       );
-      store.dispatch('setUi', '');
+      store.dispatch('taskDone');
     }
   }
 };
