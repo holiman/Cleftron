@@ -82,9 +82,6 @@ export default new Vuex.Store({
     updateObject({ commit }, data) {
       commit('updateObject', data);
     },
-    // addPassphrase({commit}, data){
-    // 	commit('SAVE_PASS', data)
-    // },
     logMsg({ commit }, data) {
       commit('addLog', data);
     }

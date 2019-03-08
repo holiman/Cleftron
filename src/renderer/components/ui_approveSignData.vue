@@ -54,17 +54,6 @@
             placeholder="0x0"
             disabled />
         </b-form-group>
-        <b-form-group
-          horizontal
-          label="Passphrase:"
-          label-class="text-sm-right"
-          label-for="pass">
-          <b-form-input
-            id="pass"
-            v-model="passphrase"
-            :disabled="disabled"
-            type="password" />
-        </b-form-group>
         <b-container>
           <b-row class="text-center">
             <b-col class="py-3">
@@ -104,21 +93,11 @@ export default {
       store: store
     };
   },
-  computed: {
-    passphrase: {
-      get() {
-        return store.state.passphrase;
-      },
-      set(value) {
-        store.dispatch('addPassphrase', value);
-      }
-    }
-  },
+  computed: {},
   methods: {
     approve() {
       const response = {
-        approved: true,
-        password: store.state.selected.password
+        approved: true
       };
       ipcRenderer.send(
         'response',

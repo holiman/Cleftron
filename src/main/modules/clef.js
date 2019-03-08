@@ -5,7 +5,7 @@ import path from 'path';
 import jsonrpc from 'jsonrpc-lite';
 import StringDecoder from 'string_decoder';
 import { validateTx } from '../../lib/validators';
-import { note } from './util';
+import { notify } from './util';
 
 const decoder = new StringDecoder.StringDecoder('utf8');
 
@@ -31,7 +31,8 @@ export function startClef(argv) {
       '--4bytedb',
       path.dirname(clefpath) + '/4byte.json',
       '--ipcdisable',
-      '--stdio-ui'
+      '--stdio-ui',
+      '--advanced'
     ]);
   } catch (error) {
     log.error(error);
@@ -93,12 +94,17 @@ export function initClefEvents(clef, mainWindow) {
     let handler = clefHandlers[payload.method];
 
     if (handler) {
-      note(mainWindow, handler.msg(payload));
+      notify(mainWindow, handler.msg(payload));
       if (handler.ui) {
         mainWindow.webContents.send('ApprovalRequired', payload);
       } else {
-        // ShowInfo, ShowError, OnSignerStartup, OnApprovedTx
-        sendClef(clef, jsonrpc.success(payload.id, {}), mainWindow);
+        // ui_ShowInfo, ui_ShowError, ui_OnSignerStartup, ui_OnApprovedTx, ui_onUserInputReqiored
+        // TODO, display this 'immediately'
+        // In the case of user input required, we need to send a response,
+        // but for notifications, there's no need
+        if (payload.id) {
+          sendClef(clef, jsonrpc.success(payload.id, {}), mainWindow);
+        }
       }
     } else {
       log.error('Missing handler for method ' + payload.method);
@@ -112,43 +118,39 @@ export function initClefEvents(clef, mainWindow) {
 }
 
 const clefHandlers = {
-  ApproveTx: {
+  ui_approveTx: {
     msg: () => 'Transaction Signing is awaiting review.',
     ui: true
   },
-  ApproveExport: {
-    msg: () => 'Account Export is awaiting review.',
-    ui: true
-  },
-  ApproveImport: {
-    msg: () => 'Account Import is awaiting review.',
-    ui: true
-  },
-  ApproveSignData: {
+  ui_approveSignData: {
     msg: () => 'Message signing is awaiting review.',
     ui: true
   },
-  ApproveListing: {
+  ui_approveListing: {
     msg: () => 'Account listing is awaiting review.',
     ui: true
   },
-  ApproveNewAccount: {
+  ui_approveNewAccount: {
     msg: () => 'New account request is awaiting review.',
     ui: true
   },
   // These ones do not have a separate UI
-  ShowInfo: { msg: data => data.params[0].text },
-  ShowError: { msg: data => data.params[0].text },
-  OnApprovedTx: { msg: data => 'Signed ' + data.params[0].tx.hash },
-  OnSignerStartup: {
+  ui_showInfo: { msg: data => data.params[0].text },
+  ui_showError: { msg: data => data.params[0].text },
+  ui_onApprovedTx: { msg: data => 'Signed ' + data.params[0].tx.hash },
+  ui_onSignerStartup: {
     msg: data =>
       'Clef is up. Web: ' +
       data.params[0].info.extapi_http +
       ' IPC:' +
       data.params[0].info.extapi_ipc
+  },
+  ui_onInputRequired: {
+    msg: data => 'Input required:' + data.params[0].text
   }
 };
-
+// validateAndSendToClef returns true if all went well,
+// false if errors occurred and message was not sent
 export function validateAndSendToClef(clef, message, mainWindow) {
   const data = JSON.parse(message);
 
@@ -159,11 +161,8 @@ export function validateAndSendToClef(clef, message, mainWindow) {
     if (errors.length > 0) {
       const errorMessage = `Transaction is invalid: ${errors.join(', ')}`;
       log.error(errorMessage);
-      dialog.showMessageBox({
-        type: 'error',
-        message: errorMessage
-      });
-      return;
+      dialog.showErrorBox('Error', errorMessage);
+      return false;
     }
 
     // Notify user of changes to original tx params
@@ -186,7 +185,7 @@ export function validateAndSendToClef(clef, message, mainWindow) {
           }
         }
       );
-      return;
+      return true;
     }
   }
 

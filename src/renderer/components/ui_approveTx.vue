@@ -236,24 +236,11 @@
         label-size="mg"
         label-class="font-weight-bold pt-0"
         class="mb-0">
-        <b-form-group
-          horizontal
-          label="Password:"
-          label-class="text-sm-right"
-          label-for="pass">
-          <b-input-group>
-            <b-form-input
-              id="pass"
-              v-model="passphrase"
-              :disabled="disabled"
-              type="password" />
-            <b-button
-              variant="primary"
-              @click="approve()">
-              Approve
-            </b-button>
-          </b-input-group>
-        </b-form-group>
+        <b-button
+          variant="primary"
+          @click="approve()">
+          Approve
+        </b-button>
       </b-form-group>
       <b-container>
         <b-row class="text-center">
@@ -318,16 +305,6 @@ export default {
     };
   },
   computed: {
-    passphrase: {
-      get() {
-        return store.state.selected.password;
-      },
-      set(value) {
-        let data = store.state.selected.obj;
-        store.state.selected.password = value;
-        store.dispatch('updateObject', data);
-      }
-    },
     from: {
       get() {
         return store.state.selected.obj.params[0].transaction.from;
@@ -426,8 +403,7 @@ export default {
       }
       const response = {
         approved: true,
-        transaction: store.state.selected.obj.params[0].transaction,
-        password: store.state.selected.password
+        transaction: store.state.selected.obj.params[0].transaction
       };
       ipcRenderer.send(
         'response',
