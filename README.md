@@ -12,6 +12,21 @@ Install dependencies:
 yarn
 ```
 
+Note, you may hit this [issue](https://github.com/yarnpkg/yarn/issues/2821):
+
+```
+ERROR: There are no scenarios; must have at least one.
+```
+
+That means you're using the wrong `yarn`, and have to do `apt remove cmdtest`, then
+
+```
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt update
+sudo apt install yarn
+```
+
 ## Develop
 
 Serve with hot reload at `localhost:9080`:

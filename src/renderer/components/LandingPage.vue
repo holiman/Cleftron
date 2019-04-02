@@ -9,12 +9,10 @@
 </template>
 
 <script>
-import ApproveTx from './ApproveTx.vue';
-import ApproveExport from './ApproveExport.vue';
-import ApproveImport from './ApproveImport.vue';
-import ApproveListing from './ApproveListing.vue';
-import ApproveSignData from './ApproveSignData.vue';
-import ApproveNewAccount from './ApproveNewAccount';
+import ui_approveTx from './ui_approveTx.vue';
+import ui_approveListing from './ui_approveListing.vue';
+import ui_approveSignData from './ui_approveSignData.vue';
+import ui_approveNewAccount from './ui_approveNewAccount';
 import Logger from './Logger.vue';
 import TaskQueue from './TaskQueue.vue';
 import { ipcRenderer } from 'electron';
@@ -24,12 +22,10 @@ export default {
   components: {
     TaskQueue,
     Logger,
-    ApproveTx,
-    ApproveExport,
-    ApproveImport,
-    ApproveListing,
-    ApproveSignData,
-    ApproveNewAccount
+    ui_approveTx,
+    ui_approveListing,
+    ui_approveSignData,
+    ui_approveNewAccount
   },
   data() {
     return {

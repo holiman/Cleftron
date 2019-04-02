@@ -1,7 +1,9 @@
 import { Notification } from 'electron';
 
+const { dialog } = require('electron');
+
 // Display a notification to the user
-export function note(mainWindow, text, surpressOnClick = false) {
+export function notify(mainWindow, text, surpressOnClick = false) {
   let notification = new Notification({ title: 'Cleftron', body: text });
   notification.show();
   if (surpressOnClick) {
@@ -9,5 +11,14 @@ export function note(mainWindow, text, surpressOnClick = false) {
   }
   notification.on('click', () => {
     mainWindow.show();
+  });
+}
+
+// Display a message to the user
+export function message(mainWindow, text, surpressOnClick = false) {
+  dialog.showMessageBox({
+    title: 'Cleftron',
+    message: text,
+    buttons: ['Ok']
   });
 }
